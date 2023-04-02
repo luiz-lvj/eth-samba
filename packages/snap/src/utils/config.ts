@@ -2,8 +2,12 @@ export const fuelNetworkConfiguration = {
     derivationPath: "m/44'/1179993420'/0'/0/0",
     network: "t",
     rpc: {
-      token: "",
-      url: "https://api.node.glif.io",
+      token: "ETH",
+      url: "https://beta-3.fuel.network/playground",
+    },
+    graphQL:{
+        token: "ETH",
+        url: "https://beta-3.fuel.network/playground"
     },
     unit: {
       decimals: 6,
