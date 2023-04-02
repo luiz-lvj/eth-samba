@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
 import bkg from '../assets/bkg_abs.jpg';
@@ -99,6 +99,8 @@ const ErrorMessage = styled.div`
 const Index = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
 
+  const [balance, setBalance] = useState(0);
+
   const handleConnectClick = async () => {
     try {
       await connectSnap();
@@ -123,10 +125,10 @@ const Index = () => {
     }
   };
 
-  const handleAuthorizeBIP44 = async () => {
+  const handleGetAddress = async () => {
     try {
       const res = await sendAuthorizationBIP44();
-      console.log(res)
+      console.log(res);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -195,7 +197,7 @@ const Index = () => {
               'pipipopo.',
             button: (
               <SendHelloButton
-                onClick={handleSendHelloClick}
+                onClick={handleGetAddress}
                 disabled={!state.installedSnap}
               />
             ),

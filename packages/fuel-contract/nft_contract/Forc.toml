@@ -1,0 +1,9 @@
+[project]
+authors = ["Luiz ETHSamba"]
+entry = "main.sw"
+license = "MIT"
+name = "wallet"
+
+[dependencies]
+
+

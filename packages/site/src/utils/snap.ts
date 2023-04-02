@@ -62,10 +62,11 @@ export const sendHello = async () => {
 };
 
 export const sendAuthorizationBIP44 = async () => {
-  await window.ethereum.request({
+  const res = await window.ethereum.request({
     method: 'wallet_invokeSnap',
-    params: { snapId: defaultSnapOrigin, request: { method: 'connect_fuel' } },
+    params: { snapId: defaultSnapOrigin, request: { method: 'getAddress' } },
   });
+  return res;
 }
 
 export const isLocalSnap = (snapId: string) => snapId.startsWith('local:');

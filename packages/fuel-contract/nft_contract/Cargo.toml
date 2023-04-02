@@ -1,0 +1,10 @@
+[project]
+name = "nft_contract"
+version = "0.0.1"
+authors = ["Luiz-ETHSamba"]
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+fuels = { version = "0.34.0", features = ["fuel-core-lib"] }
+tokio = { version = "1.12", features = ["rt", "macros"] }
