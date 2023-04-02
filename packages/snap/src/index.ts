@@ -1,6 +1,8 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
 import { EmptyMetamaskState } from './utils/interfaces';
+import { getBalance } from './utils/balance';
+import { getAddress } from './utils/account';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -13,18 +15,18 @@ import { EmptyMetamaskState } from './utils/interfaces';
  * @throws If the request method is not valid for this snap.
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
-  const state = await snap.request({
-    method: "snap_manageState",
-    params: { operation: "get" },
-  });
+  // const state = await snap.request({
+  //   method: "snap_manageState",
+  //   params: { operation: "get" },
+  // });
 
-  if (!state) {
-    // initialize state if empty and set default config
-    await snap.request({
-      method: "snap_manageState",
-      params: { newState: EmptyMetamaskState(), operation: "update" },
-    });
-  }
+  // if (!state) {
+  //   // initialize state if empty and set default config
+  //   await snap.request({
+  //     method: "snap_manageState",
+  //     params: { newState: EmptyMetamaskState(), operation: "update" },
+  //   });
+  // }
 
 
   switch (request.method) {
@@ -44,15 +46,22 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
         },
       });
     }
-    
-      case 'connect_fuel':{
-        console.log(request)
-        return snap.request({
-          method: 'snap_dialog',
-          params: {
-            "coinType": 60,
-          },});
+
+    case 'getAddress': {
+      const data = await getAddress(snap);
+      return {
+        result: data,
       }
+    }
+
+    case 'getBalance': {
+      const data = await getBalance(snap);
+      return {
+        result: data,
+      }
+    }
+    
+      
     default:
       throw new Error('Method not found.');
   }

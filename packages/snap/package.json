@@ -59,6 +59,14 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@fuel-ts/wallet": "^0.37.1"
+    "@fuel-ts/address": "^0.37.1",
+    "@fuel-ts/providers": "^0.37.1",
+    "@fuel-ts/transactions": "^0.37.1",
+    "@fuel-ts/wallet": "^0.37.1",
+    "@zondax/filecoin-signing-tools": "^2.4.1",
+    "buffer": "^6.0.3",
+    "ethers": "5.7.2",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.2.0"
   }
 }
