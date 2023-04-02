@@ -20,7 +20,7 @@ const theme = {
     small: '1.4rem',
   },
   radii: {
-    default: '24px',
+    default: '36px',
     button: '8px',
   },
   breakpoints,
@@ -57,7 +57,7 @@ export const light: DefaultTheme = {
       inverse: '#FFFFFF',
     },
     border: {
-      default: '#BBC0C5',
+      default: '#6FA8DC',
     },
     primary: {
       default: '#6FA8DC',
@@ -97,7 +97,7 @@ export const dark: DefaultTheme = {
       inverse: '#24272A',
     },
     border: {
-      default: '#848C96',
+      default: '#6FA8DC',
     },
     primary: {
       default: '#6FA8DC',

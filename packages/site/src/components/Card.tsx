@@ -18,7 +18,7 @@ const CardWrapper = styled.div<{ fullWidth?: boolean; disabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.card.default};
   margin-top: 2.4rem;
   margin-bottom: 2.4rem;
-  padding: 2.4rem;
+  padding: 2.0rem;
   border: 1px solid ${({ theme }) => theme.colors.border.default};
   border-radius: ${({ theme }) => theme.radii.default};
   box-shadow: ${({ theme }) => theme.shadows.default};

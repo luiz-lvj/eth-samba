@@ -45,1966 +45,6 @@
     return r;
   }()({
     1: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.text = exports.spinner = exports.panel = exports.heading = exports.divider = exports.copyable = void 0;
-      const utils_1 = require("@metamask/utils");
-      const nodes_1 = require("./nodes");
-      function createBuilder(type, struct, keys = []) {
-        return (...args) => {
-          if (args.length === 1 && (0, utils_1.isPlainObject)(args[0])) {
-            const node = Object.assign(Object.assign({}, args[0]), {
-              type
-            });
-            (0, utils_1.assertStruct)(node, struct, `Invalid ${type} component`);
-            return node;
-          }
-          const node = keys.reduce((partialNode, key, index) => {
-            return Object.assign(Object.assign({}, partialNode), {
-              [key]: args[index]
-            });
-          }, {
-            type
-          });
-          (0, utils_1.assertStruct)(node, struct, `Invalid ${type} component`);
-          return node;
-        };
-      }
-      exports.copyable = createBuilder(nodes_1.NodeType.Copyable, nodes_1.CopyableStruct, ['value']);
-      exports.divider = createBuilder(nodes_1.NodeType.Divider, nodes_1.DividerStruct);
-      exports.heading = createBuilder(nodes_1.NodeType.Heading, nodes_1.HeadingStruct, ['value']);
-      exports.panel = createBuilder(nodes_1.NodeType.Panel, nodes_1.PanelStruct, ['children']);
-      exports.spinner = createBuilder(nodes_1.NodeType.Spinner, nodes_1.SpinnerStruct);
-      exports.text = createBuilder(nodes_1.NodeType.Text, nodes_1.TextStruct, ['value']);
-    }, {
-      "./nodes": 3,
-      "@metamask/utils": 12
-    }],
-    2: [function (require, module, exports) {
-      "use strict";
-
-      var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        var desc = Object.getOwnPropertyDescriptor(m, k);
-        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-          desc = {
-            enumerable: true,
-            get: function () {
-              return m[k];
-            }
-          };
-        }
-        Object.defineProperty(o, k2, desc);
-      } : function (o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        o[k2] = m[k];
-      });
-      var __exportStar = this && this.__exportStar || function (m, exports) {
-        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-      };
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      __exportStar(require("./builder"), exports);
-      __exportStar(require("./nodes"), exports);
-      __exportStar(require("./validation"), exports);
-    }, {
-      "./builder": 1,
-      "./nodes": 3,
-      "./validation": 4
-    }],
-    3: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.ComponentStruct = exports.TextStruct = exports.SpinnerStruct = exports.PanelStruct = exports.HeadingStruct = exports.DividerStruct = exports.CopyableStruct = exports.NodeType = void 0;
-      const superstruct_1 = require("superstruct");
-      const NodeStruct = (0, superstruct_1.object)({
-        type: (0, superstruct_1.string)()
-      });
-      const ParentStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
-        children: (0, superstruct_1.array)((0, superstruct_1.lazy)(() => exports.ComponentStruct))
-      }));
-      const LiteralStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
-        value: (0, superstruct_1.unknown)()
-      }));
-      var NodeType;
-      (function (NodeType) {
-        NodeType["Copyable"] = "copyable";
-        NodeType["Divider"] = "divider";
-        NodeType["Heading"] = "heading";
-        NodeType["Panel"] = "panel";
-        NodeType["Spinner"] = "spinner";
-        NodeType["Text"] = "text";
-      })(NodeType = exports.NodeType || (exports.NodeType = {}));
-      exports.CopyableStruct = (0, superstruct_1.assign)(LiteralStruct, (0, superstruct_1.object)({
-        type: (0, superstruct_1.literal)(NodeType.Copyable),
-        value: (0, superstruct_1.string)()
-      }));
-      exports.DividerStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
-        type: (0, superstruct_1.literal)(NodeType.Divider)
-      }));
-      exports.HeadingStruct = (0, superstruct_1.assign)(LiteralStruct, (0, superstruct_1.object)({
-        type: (0, superstruct_1.literal)(NodeType.Heading),
-        value: (0, superstruct_1.string)()
-      }));
-      exports.PanelStruct = (0, superstruct_1.assign)(ParentStruct, (0, superstruct_1.object)({
-        type: (0, superstruct_1.literal)(NodeType.Panel)
-      }));
-      exports.SpinnerStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
-        type: (0, superstruct_1.literal)(NodeType.Spinner)
-      }));
-      exports.TextStruct = (0, superstruct_1.assign)(LiteralStruct, (0, superstruct_1.object)({
-        type: (0, superstruct_1.literal)(NodeType.Text),
-        value: (0, superstruct_1.string)()
-      }));
-      exports.ComponentStruct = (0, superstruct_1.union)([exports.CopyableStruct, exports.DividerStruct, exports.HeadingStruct, exports.PanelStruct, exports.SpinnerStruct, exports.TextStruct]);
-    }, {
-      "superstruct": 73
-    }],
-    4: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.assertIsComponent = exports.isComponent = void 0;
-      const utils_1 = require("@metamask/utils");
-      const superstruct_1 = require("superstruct");
-      const nodes_1 = require("./nodes");
-      function isComponent(value) {
-        return (0, superstruct_1.is)(value, nodes_1.ComponentStruct);
-      }
-      exports.isComponent = isComponent;
-      function assertIsComponent(value) {
-        (0, utils_1.assertStruct)(value, nodes_1.ComponentStruct, 'Invalid component');
-      }
-      exports.assertIsComponent = assertIsComponent;
-    }, {
-      "./nodes": 3,
-      "@metamask/utils": 12,
-      "superstruct": 73
-    }],
-    5: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.assertExhaustive = exports.assertStruct = exports.assert = exports.AssertionError = void 0;
-      const superstruct_1 = require("superstruct");
-      function isErrorWithMessage(error) {
-        return typeof error === 'object' && error !== null && 'message' in error;
-      }
-      function isConstructable(fn) {
-        var _a, _b;
-        return Boolean(typeof ((_b = (_a = fn === null || fn === void 0 ? void 0 : fn.prototype) === null || _a === void 0 ? void 0 : _a.constructor) === null || _b === void 0 ? void 0 : _b.name) === 'string');
-      }
-      function getErrorMessage(error) {
-        const message = isErrorWithMessage(error) ? error.message : String(error);
-        if (message.endsWith('.')) {
-          return message.slice(0, -1);
-        }
-        return message;
-      }
-      function getError(ErrorWrapper, message) {
-        if (isConstructable(ErrorWrapper)) {
-          return new ErrorWrapper({
-            message
-          });
-        }
-        return ErrorWrapper({
-          message
-        });
-      }
-      class AssertionError extends Error {
-        constructor(options) {
-          super(options.message);
-          this.code = 'ERR_ASSERTION';
-        }
-      }
-      exports.AssertionError = AssertionError;
-      function assert(value, message = 'Assertion failed.', ErrorWrapper = AssertionError) {
-        if (!value) {
-          if (message instanceof Error) {
-            throw message;
-          }
-          throw getError(ErrorWrapper, message);
-        }
-      }
-      exports.assert = assert;
-      function assertStruct(value, struct, errorPrefix = 'Assertion failed', ErrorWrapper = AssertionError) {
-        try {
-          (0, superstruct_1.assert)(value, struct);
-        } catch (error) {
-          throw getError(ErrorWrapper, `${errorPrefix}: ${getErrorMessage(error)}.`);
-        }
-      }
-      exports.assertStruct = assertStruct;
-      function assertExhaustive(_object) {
-        throw new Error('Invalid branch reached. Should be detected during compilation.');
-      }
-      exports.assertExhaustive = assertExhaustive;
-    }, {
-      "superstruct": 20
-    }],
-    6: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.base64 = void 0;
-      const superstruct_1 = require("superstruct");
-      const assert_1 = require("./assert");
-      const base64 = (struct, options = {}) => {
-        var _a, _b;
-        const paddingRequired = (_a = options.paddingRequired) !== null && _a !== void 0 ? _a : false;
-        const characterSet = (_b = options.characterSet) !== null && _b !== void 0 ? _b : 'base64';
-        let letters;
-        if (characterSet === 'base64') {
-          letters = String.raw`[A-Za-z0-9+\/]`;
-        } else {
-          (0, assert_1.assert)(characterSet === 'base64url');
-          letters = String.raw`[-_A-Za-z0-9]`;
-        }
-        let re;
-        if (paddingRequired) {
-          re = new RegExp(`^(?:${letters}{4})*(?:${letters}{3}=|${letters}{2}==)?$`, 'u');
-        } else {
-          re = new RegExp(`^(?:${letters}{4})*(?:${letters}{2,3}|${letters}{3}=|${letters}{2}==)?$`, 'u');
-        }
-        return (0, superstruct_1.pattern)(struct, re);
-      };
-      exports.base64 = base64;
-    }, {
-      "./assert": 5,
-      "superstruct": 20
-    }],
-    7: [function (require, module, exports) {
-      (function () {
-        (function () {
-          "use strict";
-
-          Object.defineProperty(exports, "__esModule", {
-            value: true
-          });
-          exports.createDataView = exports.concatBytes = exports.valueToBytes = exports.stringToBytes = exports.numberToBytes = exports.signedBigIntToBytes = exports.bigIntToBytes = exports.hexToBytes = exports.bytesToString = exports.bytesToNumber = exports.bytesToSignedBigInt = exports.bytesToBigInt = exports.bytesToHex = exports.assertIsBytes = exports.isBytes = void 0;
-          const assert_1 = require("./assert");
-          const hex_1 = require("./hex");
-          const HEX_MINIMUM_NUMBER_CHARACTER = 48;
-          const HEX_MAXIMUM_NUMBER_CHARACTER = 58;
-          const HEX_CHARACTER_OFFSET = 87;
-          function getPrecomputedHexValuesBuilder() {
-            const lookupTable = [];
-            return () => {
-              if (lookupTable.length === 0) {
-                for (let i = 0; i < 256; i++) {
-                  lookupTable.push(i.toString(16).padStart(2, '0'));
-                }
-              }
-              return lookupTable;
-            };
-          }
-          const getPrecomputedHexValues = getPrecomputedHexValuesBuilder();
-          function isBytes(value) {
-            return value instanceof Uint8Array;
-          }
-          exports.isBytes = isBytes;
-          function assertIsBytes(value) {
-            (0, assert_1.assert)(isBytes(value), 'Value must be a Uint8Array.');
-          }
-          exports.assertIsBytes = assertIsBytes;
-          function bytesToHex(bytes) {
-            assertIsBytes(bytes);
-            if (bytes.length === 0) {
-              return '0x';
-            }
-            const lookupTable = getPrecomputedHexValues();
-            const hexadecimal = new Array(bytes.length);
-            for (let i = 0; i < bytes.length; i++) {
-              hexadecimal[i] = lookupTable[bytes[i]];
-            }
-            return (0, hex_1.add0x)(hexadecimal.join(''));
-          }
-          exports.bytesToHex = bytesToHex;
-          function bytesToBigInt(bytes) {
-            assertIsBytes(bytes);
-            const hexadecimal = bytesToHex(bytes);
-            return BigInt(hexadecimal);
-          }
-          exports.bytesToBigInt = bytesToBigInt;
-          function bytesToSignedBigInt(bytes) {
-            assertIsBytes(bytes);
-            let value = BigInt(0);
-            for (const byte of bytes) {
-              value = (value << BigInt(8)) + BigInt(byte);
-            }
-            return BigInt.asIntN(bytes.length * 8, value);
-          }
-          exports.bytesToSignedBigInt = bytesToSignedBigInt;
-          function bytesToNumber(bytes) {
-            assertIsBytes(bytes);
-            const bigint = bytesToBigInt(bytes);
-            (0, assert_1.assert)(bigint <= BigInt(Number.MAX_SAFE_INTEGER), 'Number is not a safe integer. Use `bytesToBigInt` instead.');
-            return Number(bigint);
-          }
-          exports.bytesToNumber = bytesToNumber;
-          function bytesToString(bytes) {
-            assertIsBytes(bytes);
-            return new TextDecoder().decode(bytes);
-          }
-          exports.bytesToString = bytesToString;
-          function hexToBytes(value) {
-            var _a;
-            if (((_a = value === null || value === void 0 ? void 0 : value.toLowerCase) === null || _a === void 0 ? void 0 : _a.call(value)) === '0x') {
-              return new Uint8Array();
-            }
-            (0, hex_1.assertIsHexString)(value);
-            const strippedValue = (0, hex_1.remove0x)(value).toLowerCase();
-            const normalizedValue = strippedValue.length % 2 === 0 ? strippedValue : `0${strippedValue}`;
-            const bytes = new Uint8Array(normalizedValue.length / 2);
-            for (let i = 0; i < bytes.length; i++) {
-              const c1 = normalizedValue.charCodeAt(i * 2);
-              const c2 = normalizedValue.charCodeAt(i * 2 + 1);
-              const n1 = c1 - (c1 < HEX_MAXIMUM_NUMBER_CHARACTER ? HEX_MINIMUM_NUMBER_CHARACTER : HEX_CHARACTER_OFFSET);
-              const n2 = c2 - (c2 < HEX_MAXIMUM_NUMBER_CHARACTER ? HEX_MINIMUM_NUMBER_CHARACTER : HEX_CHARACTER_OFFSET);
-              bytes[i] = n1 * 16 + n2;
-            }
-            return bytes;
-          }
-          exports.hexToBytes = hexToBytes;
-          function bigIntToBytes(value) {
-            (0, assert_1.assert)(typeof value === 'bigint', 'Value must be a bigint.');
-            (0, assert_1.assert)(value >= BigInt(0), 'Value must be a non-negative bigint.');
-            const hexadecimal = value.toString(16);
-            return hexToBytes(hexadecimal);
-          }
-          exports.bigIntToBytes = bigIntToBytes;
-          function bigIntFits(value, bytes) {
-            (0, assert_1.assert)(bytes > 0);
-            const mask = value >> BigInt(31);
-            return !((~value & mask) + (value & ~mask) >> BigInt(bytes * 8 + ~0));
-          }
-          function signedBigIntToBytes(value, byteLength) {
-            (0, assert_1.assert)(typeof value === 'bigint', 'Value must be a bigint.');
-            (0, assert_1.assert)(typeof byteLength === 'number', 'Byte length must be a number.');
-            (0, assert_1.assert)(byteLength > 0, 'Byte length must be greater than 0.');
-            (0, assert_1.assert)(bigIntFits(value, byteLength), 'Byte length is too small to represent the given value.');
-            let numberValue = value;
-            const bytes = new Uint8Array(byteLength);
-            for (let i = 0; i < bytes.length; i++) {
-              bytes[i] = Number(BigInt.asUintN(8, numberValue));
-              numberValue >>= BigInt(8);
-            }
-            return bytes.reverse();
-          }
-          exports.signedBigIntToBytes = signedBigIntToBytes;
-          function numberToBytes(value) {
-            (0, assert_1.assert)(typeof value === 'number', 'Value must be a number.');
-            (0, assert_1.assert)(value >= 0, 'Value must be a non-negative number.');
-            (0, assert_1.assert)(Number.isSafeInteger(value), 'Value is not a safe integer. Use `bigIntToBytes` instead.');
-            const hexadecimal = value.toString(16);
-            return hexToBytes(hexadecimal);
-          }
-          exports.numberToBytes = numberToBytes;
-          function stringToBytes(value) {
-            (0, assert_1.assert)(typeof value === 'string', 'Value must be a string.');
-            return new TextEncoder().encode(value);
-          }
-          exports.stringToBytes = stringToBytes;
-          function valueToBytes(value) {
-            if (typeof value === 'bigint') {
-              return bigIntToBytes(value);
-            }
-            if (typeof value === 'number') {
-              return numberToBytes(value);
-            }
-            if (typeof value === 'string') {
-              if (value.startsWith('0x')) {
-                return hexToBytes(value);
-              }
-              return stringToBytes(value);
-            }
-            if (isBytes(value)) {
-              return value;
-            }
-            throw new TypeError(`Unsupported value type: "${typeof value}".`);
-          }
-          exports.valueToBytes = valueToBytes;
-          function concatBytes(values) {
-            const normalizedValues = new Array(values.length);
-            let byteLength = 0;
-            for (let i = 0; i < values.length; i++) {
-              const value = valueToBytes(values[i]);
-              normalizedValues[i] = value;
-              byteLength += value.length;
-            }
-            const bytes = new Uint8Array(byteLength);
-            for (let i = 0, offset = 0; i < normalizedValues.length; i++) {
-              bytes.set(normalizedValues[i], offset);
-              offset += normalizedValues[i].length;
-            }
-            return bytes;
-          }
-          exports.concatBytes = concatBytes;
-          function createDataView(bytes) {
-            if (typeof Buffer !== 'undefined' && bytes instanceof Buffer) {
-              const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-              return new DataView(buffer);
-            }
-            return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-          }
-          exports.createDataView = createDataView;
-        }).call(this);
-      }).call(this, require("buffer").Buffer);
-    }, {
-      "./assert": 5,
-      "./hex": 11,
-      "buffer": 22
-    }],
-    8: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.ChecksumStruct = void 0;
-      const superstruct_1 = require("superstruct");
-      const base64_1 = require("./base64");
-      exports.ChecksumStruct = (0, superstruct_1.size)((0, base64_1.base64)((0, superstruct_1.string)(), {
-        paddingRequired: true
-      }), 44, 44);
-    }, {
-      "./base64": 6,
-      "superstruct": 20
-    }],
-    9: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.createHex = exports.createBytes = exports.createBigInt = exports.createNumber = void 0;
-      const superstruct_1 = require("superstruct");
-      const assert_1 = require("./assert");
-      const bytes_1 = require("./bytes");
-      const hex_1 = require("./hex");
-      const NumberLikeStruct = (0, superstruct_1.union)([(0, superstruct_1.number)(), (0, superstruct_1.bigint)(), (0, superstruct_1.string)(), hex_1.StrictHexStruct]);
-      const NumberCoercer = (0, superstruct_1.coerce)((0, superstruct_1.number)(), NumberLikeStruct, Number);
-      const BigIntCoercer = (0, superstruct_1.coerce)((0, superstruct_1.bigint)(), NumberLikeStruct, BigInt);
-      const BytesLikeStruct = (0, superstruct_1.union)([hex_1.StrictHexStruct, (0, superstruct_1.instance)(Uint8Array)]);
-      const BytesCoercer = (0, superstruct_1.coerce)((0, superstruct_1.instance)(Uint8Array), (0, superstruct_1.union)([hex_1.StrictHexStruct]), bytes_1.hexToBytes);
-      const HexCoercer = (0, superstruct_1.coerce)(hex_1.StrictHexStruct, (0, superstruct_1.instance)(Uint8Array), bytes_1.bytesToHex);
-      function createNumber(value) {
-        try {
-          const result = (0, superstruct_1.create)(value, NumberCoercer);
-          (0, assert_1.assert)(Number.isFinite(result), `Expected a number-like value, got "${value}".`);
-          return result;
-        } catch (error) {
-          if (error instanceof superstruct_1.StructError) {
-            throw new Error(`Expected a number-like value, got "${value}".`);
-          }
-          throw error;
-        }
-      }
-      exports.createNumber = createNumber;
-      function createBigInt(value) {
-        try {
-          return (0, superstruct_1.create)(value, BigIntCoercer);
-        } catch (error) {
-          if (error instanceof superstruct_1.StructError) {
-            throw new Error(`Expected a number-like value, got "${String(error.value)}".`);
-          }
-          throw error;
-        }
-      }
-      exports.createBigInt = createBigInt;
-      function createBytes(value) {
-        if (typeof value === 'string' && value.toLowerCase() === '0x') {
-          return new Uint8Array();
-        }
-        try {
-          return (0, superstruct_1.create)(value, BytesCoercer);
-        } catch (error) {
-          if (error instanceof superstruct_1.StructError) {
-            throw new Error(`Expected a bytes-like value, got "${String(error.value)}".`);
-          }
-          throw error;
-        }
-      }
-      exports.createBytes = createBytes;
-      function createHex(value) {
-        if (value instanceof Uint8Array && value.length === 0 || typeof value === 'string' && value.toLowerCase() === '0x') {
-          return '0x';
-        }
-        try {
-          return (0, superstruct_1.create)(value, HexCoercer);
-        } catch (error) {
-          if (error instanceof superstruct_1.StructError) {
-            throw new Error(`Expected a bytes-like value, got "${String(error.value)}".`);
-          }
-          throw error;
-        }
-      }
-      exports.createHex = createHex;
-    }, {
-      "./assert": 5,
-      "./bytes": 7,
-      "./hex": 11,
-      "superstruct": 20
-    }],
-    10: [function (require, module, exports) {
-      "use strict";
-
-      var __classPrivateFieldSet = this && this.__classPrivateFieldSet || function (receiver, state, value, kind, f) {
-        if (kind === "m") throw new TypeError("Private method is not writable");
-        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
-      };
-      var __classPrivateFieldGet = this && this.__classPrivateFieldGet || function (receiver, state, kind, f) {
-        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-      };
-      var _FrozenMap_map, _FrozenSet_set;
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.FrozenSet = exports.FrozenMap = void 0;
-      class FrozenMap {
-        constructor(entries) {
-          _FrozenMap_map.set(this, void 0);
-          __classPrivateFieldSet(this, _FrozenMap_map, new Map(entries), "f");
-          Object.freeze(this);
-        }
-        get size() {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").size;
-        }
-        [(_FrozenMap_map = new WeakMap(), Symbol.iterator)]() {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f")[Symbol.iterator]();
-        }
-        entries() {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").entries();
-        }
-        forEach(callbackfn, thisArg) {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").forEach((value, key, _map) => callbackfn.call(thisArg, value, key, this));
-        }
-        get(key) {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").get(key);
-        }
-        has(key) {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").has(key);
-        }
-        keys() {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").keys();
-        }
-        values() {
-          return __classPrivateFieldGet(this, _FrozenMap_map, "f").values();
-        }
-        toString() {
-          return `FrozenMap(${this.size}) {${this.size > 0 ? ` ${[...this.entries()].map(([key, value]) => `${String(key)} => ${String(value)}`).join(', ')} ` : ''}}`;
-        }
-      }
-      exports.FrozenMap = FrozenMap;
-      class FrozenSet {
-        constructor(values) {
-          _FrozenSet_set.set(this, void 0);
-          __classPrivateFieldSet(this, _FrozenSet_set, new Set(values), "f");
-          Object.freeze(this);
-        }
-        get size() {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f").size;
-        }
-        [(_FrozenSet_set = new WeakMap(), Symbol.iterator)]() {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f")[Symbol.iterator]();
-        }
-        entries() {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f").entries();
-        }
-        forEach(callbackfn, thisArg) {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f").forEach((value, value2, _set) => callbackfn.call(thisArg, value, value2, this));
-        }
-        has(value) {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f").has(value);
-        }
-        keys() {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f").keys();
-        }
-        values() {
-          return __classPrivateFieldGet(this, _FrozenSet_set, "f").values();
-        }
-        toString() {
-          return `FrozenSet(${this.size}) {${this.size > 0 ? ` ${[...this.values()].map(member => String(member)).join(', ')} ` : ''}}`;
-        }
-      }
-      exports.FrozenSet = FrozenSet;
-      Object.freeze(FrozenMap);
-      Object.freeze(FrozenMap.prototype);
-      Object.freeze(FrozenSet);
-      Object.freeze(FrozenSet.prototype);
-    }, {}],
-    11: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.remove0x = exports.add0x = exports.assertIsStrictHexString = exports.assertIsHexString = exports.isStrictHexString = exports.isHexString = exports.StrictHexStruct = exports.HexStruct = void 0;
-      const superstruct_1 = require("superstruct");
-      const assert_1 = require("./assert");
-      exports.HexStruct = (0, superstruct_1.pattern)((0, superstruct_1.string)(), /^(?:0x)?[0-9a-f]+$/iu);
-      exports.StrictHexStruct = (0, superstruct_1.pattern)((0, superstruct_1.string)(), /^0x[0-9a-f]+$/iu);
-      function isHexString(value) {
-        return (0, superstruct_1.is)(value, exports.HexStruct);
-      }
-      exports.isHexString = isHexString;
-      function isStrictHexString(value) {
-        return (0, superstruct_1.is)(value, exports.StrictHexStruct);
-      }
-      exports.isStrictHexString = isStrictHexString;
-      function assertIsHexString(value) {
-        (0, assert_1.assert)(isHexString(value), 'Value must be a hexadecimal string.');
-      }
-      exports.assertIsHexString = assertIsHexString;
-      function assertIsStrictHexString(value) {
-        (0, assert_1.assert)(isStrictHexString(value), 'Value must be a hexadecimal string, starting with "0x".');
-      }
-      exports.assertIsStrictHexString = assertIsStrictHexString;
-      function add0x(hexadecimal) {
-        if (hexadecimal.startsWith('0x')) {
-          return hexadecimal;
-        }
-        if (hexadecimal.startsWith('0X')) {
-          return `0x${hexadecimal.substring(2)}`;
-        }
-        return `0x${hexadecimal}`;
-      }
-      exports.add0x = add0x;
-      function remove0x(hexadecimal) {
-        if (hexadecimal.startsWith('0x') || hexadecimal.startsWith('0X')) {
-          return hexadecimal.substring(2);
-        }
-        return hexadecimal;
-      }
-      exports.remove0x = remove0x;
-    }, {
-      "./assert": 5,
-      "superstruct": 20
-    }],
-    12: [function (require, module, exports) {
-      "use strict";
-
-      var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        var desc = Object.getOwnPropertyDescriptor(m, k);
-        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-          desc = {
-            enumerable: true,
-            get: function () {
-              return m[k];
-            }
-          };
-        }
-        Object.defineProperty(o, k2, desc);
-      } : function (o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        o[k2] = m[k];
-      });
-      var __exportStar = this && this.__exportStar || function (m, exports) {
-        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-      };
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      __exportStar(require("./assert"), exports);
-      __exportStar(require("./base64"), exports);
-      __exportStar(require("./bytes"), exports);
-      __exportStar(require("./checksum"), exports);
-      __exportStar(require("./coercers"), exports);
-      __exportStar(require("./collections"), exports);
-      __exportStar(require("./hex"), exports);
-      __exportStar(require("./json"), exports);
-      __exportStar(require("./logging"), exports);
-      __exportStar(require("./misc"), exports);
-      __exportStar(require("./number"), exports);
-      __exportStar(require("./opaque"), exports);
-      __exportStar(require("./time"), exports);
-      __exportStar(require("./versions"), exports);
-    }, {
-      "./assert": 5,
-      "./base64": 6,
-      "./bytes": 7,
-      "./checksum": 8,
-      "./coercers": 9,
-      "./collections": 10,
-      "./hex": 11,
-      "./json": 13,
-      "./logging": 14,
-      "./misc": 15,
-      "./number": 16,
-      "./opaque": 17,
-      "./time": 18,
-      "./versions": 19
-    }],
-    13: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.validateJsonAndGetSize = exports.getJsonRpcIdValidator = exports.assertIsJsonRpcError = exports.isJsonRpcError = exports.assertIsJsonRpcFailure = exports.isJsonRpcFailure = exports.assertIsJsonRpcSuccess = exports.isJsonRpcSuccess = exports.assertIsJsonRpcResponse = exports.isJsonRpcResponse = exports.assertIsPendingJsonRpcResponse = exports.isPendingJsonRpcResponse = exports.JsonRpcResponseStruct = exports.JsonRpcFailureStruct = exports.JsonRpcSuccessStruct = exports.PendingJsonRpcResponseStruct = exports.assertIsJsonRpcRequest = exports.isJsonRpcRequest = exports.assertIsJsonRpcNotification = exports.isJsonRpcNotification = exports.JsonRpcNotificationStruct = exports.JsonRpcRequestStruct = exports.JsonRpcParamsStruct = exports.JsonRpcErrorStruct = exports.JsonRpcIdStruct = exports.JsonRpcVersionStruct = exports.jsonrpc2 = exports.isValidJson = exports.JsonStruct = void 0;
-      const superstruct_1 = require("superstruct");
-      const assert_1 = require("./assert");
-      const misc_1 = require("./misc");
-      exports.JsonStruct = (0, superstruct_1.define)('Json', value => {
-        const [isValid] = validateJsonAndGetSize(value, true);
-        if (!isValid) {
-          return 'Expected a valid JSON-serializable value';
-        }
-        return true;
-      });
-      function isValidJson(value) {
-        return (0, superstruct_1.is)(value, exports.JsonStruct);
-      }
-      exports.isValidJson = isValidJson;
-      exports.jsonrpc2 = '2.0';
-      exports.JsonRpcVersionStruct = (0, superstruct_1.literal)(exports.jsonrpc2);
-      exports.JsonRpcIdStruct = (0, superstruct_1.nullable)((0, superstruct_1.union)([(0, superstruct_1.number)(), (0, superstruct_1.string)()]));
-      exports.JsonRpcErrorStruct = (0, superstruct_1.object)({
-        code: (0, superstruct_1.integer)(),
-        message: (0, superstruct_1.string)(),
-        data: (0, superstruct_1.optional)(exports.JsonStruct),
-        stack: (0, superstruct_1.optional)((0, superstruct_1.string)())
-      });
-      exports.JsonRpcParamsStruct = (0, superstruct_1.optional)((0, superstruct_1.union)([(0, superstruct_1.record)((0, superstruct_1.string)(), exports.JsonStruct), (0, superstruct_1.array)(exports.JsonStruct)]));
-      exports.JsonRpcRequestStruct = (0, superstruct_1.object)({
-        id: exports.JsonRpcIdStruct,
-        jsonrpc: exports.JsonRpcVersionStruct,
-        method: (0, superstruct_1.string)(),
-        params: exports.JsonRpcParamsStruct
-      });
-      exports.JsonRpcNotificationStruct = (0, superstruct_1.omit)(exports.JsonRpcRequestStruct, ['id']);
-      function isJsonRpcNotification(value) {
-        return (0, superstruct_1.is)(value, exports.JsonRpcNotificationStruct);
-      }
-      exports.isJsonRpcNotification = isJsonRpcNotification;
-      function assertIsJsonRpcNotification(value, ErrorWrapper) {
-        (0, assert_1.assertStruct)(value, exports.JsonRpcNotificationStruct, 'Invalid JSON-RPC notification', ErrorWrapper);
-      }
-      exports.assertIsJsonRpcNotification = assertIsJsonRpcNotification;
-      function isJsonRpcRequest(value) {
-        return (0, superstruct_1.is)(value, exports.JsonRpcRequestStruct);
-      }
-      exports.isJsonRpcRequest = isJsonRpcRequest;
-      function assertIsJsonRpcRequest(value, ErrorWrapper) {
-        (0, assert_1.assertStruct)(value, exports.JsonRpcRequestStruct, 'Invalid JSON-RPC request', ErrorWrapper);
-      }
-      exports.assertIsJsonRpcRequest = assertIsJsonRpcRequest;
-      exports.PendingJsonRpcResponseStruct = (0, superstruct_1.object)({
-        id: exports.JsonRpcIdStruct,
-        jsonrpc: exports.JsonRpcVersionStruct,
-        result: (0, superstruct_1.optional)((0, superstruct_1.unknown)()),
-        error: (0, superstruct_1.optional)(exports.JsonRpcErrorStruct)
-      });
-      exports.JsonRpcSuccessStruct = (0, superstruct_1.object)({
-        id: exports.JsonRpcIdStruct,
-        jsonrpc: exports.JsonRpcVersionStruct,
-        result: exports.JsonStruct
-      });
-      exports.JsonRpcFailureStruct = (0, superstruct_1.object)({
-        id: exports.JsonRpcIdStruct,
-        jsonrpc: exports.JsonRpcVersionStruct,
-        error: exports.JsonRpcErrorStruct
-      });
-      exports.JsonRpcResponseStruct = (0, superstruct_1.union)([exports.JsonRpcSuccessStruct, exports.JsonRpcFailureStruct]);
-      function isPendingJsonRpcResponse(response) {
-        return (0, superstruct_1.is)(response, exports.PendingJsonRpcResponseStruct);
-      }
-      exports.isPendingJsonRpcResponse = isPendingJsonRpcResponse;
-      function assertIsPendingJsonRpcResponse(response, ErrorWrapper) {
-        (0, assert_1.assertStruct)(response, exports.PendingJsonRpcResponseStruct, 'Invalid pending JSON-RPC response', ErrorWrapper);
-      }
-      exports.assertIsPendingJsonRpcResponse = assertIsPendingJsonRpcResponse;
-      function isJsonRpcResponse(response) {
-        return (0, superstruct_1.is)(response, exports.JsonRpcResponseStruct);
-      }
-      exports.isJsonRpcResponse = isJsonRpcResponse;
-      function assertIsJsonRpcResponse(value, ErrorWrapper) {
-        (0, assert_1.assertStruct)(value, exports.JsonRpcResponseStruct, 'Invalid JSON-RPC response', ErrorWrapper);
-      }
-      exports.assertIsJsonRpcResponse = assertIsJsonRpcResponse;
-      function isJsonRpcSuccess(value) {
-        return (0, superstruct_1.is)(value, exports.JsonRpcSuccessStruct);
-      }
-      exports.isJsonRpcSuccess = isJsonRpcSuccess;
-      function assertIsJsonRpcSuccess(value, ErrorWrapper) {
-        (0, assert_1.assertStruct)(value, exports.JsonRpcSuccessStruct, 'Invalid JSON-RPC success response', ErrorWrapper);
-      }
-      exports.assertIsJsonRpcSuccess = assertIsJsonRpcSuccess;
-      function isJsonRpcFailure(value) {
-        return (0, superstruct_1.is)(value, exports.JsonRpcFailureStruct);
-      }
-      exports.isJsonRpcFailure = isJsonRpcFailure;
-      function assertIsJsonRpcFailure(value, ErrorWrapper) {
-        (0, assert_1.assertStruct)(value, exports.JsonRpcFailureStruct, 'Invalid JSON-RPC failure response', ErrorWrapper);
-      }
-      exports.assertIsJsonRpcFailure = assertIsJsonRpcFailure;
-      function isJsonRpcError(value) {
-        return (0, superstruct_1.is)(value, exports.JsonRpcErrorStruct);
-      }
-      exports.isJsonRpcError = isJsonRpcError;
-      function assertIsJsonRpcError(value, ErrorWrapper) {
-        (0, assert_1.assertStruct)(value, exports.JsonRpcErrorStruct, 'Invalid JSON-RPC error', ErrorWrapper);
-      }
-      exports.assertIsJsonRpcError = assertIsJsonRpcError;
-      function getJsonRpcIdValidator(options) {
-        const {
-          permitEmptyString,
-          permitFractions,
-          permitNull
-        } = Object.assign({
-          permitEmptyString: true,
-          permitFractions: false,
-          permitNull: true
-        }, options);
-        const isValidJsonRpcId = id => {
-          return Boolean(typeof id === 'number' && (permitFractions || Number.isInteger(id)) || typeof id === 'string' && (permitEmptyString || id.length > 0) || permitNull && id === null);
-        };
-        return isValidJsonRpcId;
-      }
-      exports.getJsonRpcIdValidator = getJsonRpcIdValidator;
-      function validateJsonAndGetSize(jsObject, skipSizingProcess = false) {
-        const seenObjects = new Set();
-        function getJsonSerializableInfo(value, skipSizing) {
-          if (value === undefined) {
-            return [false, 0];
-          } else if (value === null) {
-            return [true, skipSizing ? 0 : misc_1.JsonSize.Null];
-          }
-          const typeOfValue = typeof value;
-          try {
-            if (typeOfValue === 'function') {
-              return [false, 0];
-            } else if (typeOfValue === 'string' || value instanceof String) {
-              return [true, skipSizing ? 0 : (0, misc_1.calculateStringSize)(value) + misc_1.JsonSize.Quote * 2];
-            } else if (typeOfValue === 'boolean' || value instanceof Boolean) {
-              if (skipSizing) {
-                return [true, 0];
-              }
-              return [true, value == true ? misc_1.JsonSize.True : misc_1.JsonSize.False];
-            } else if (typeOfValue === 'number' || value instanceof Number) {
-              if (skipSizing) {
-                return [true, 0];
-              }
-              return [true, (0, misc_1.calculateNumberSize)(value)];
-            } else if (value instanceof Date) {
-              if (skipSizing) {
-                return [true, 0];
-              }
-              return [true, isNaN(value.getDate()) ? misc_1.JsonSize.Null : misc_1.JsonSize.Date + misc_1.JsonSize.Quote * 2];
-            }
-          } catch (_) {
-            return [false, 0];
-          }
-          if (!(0, misc_1.isPlainObject)(value) && !Array.isArray(value)) {
-            return [false, 0];
-          }
-          if (seenObjects.has(value)) {
-            return [false, 0];
-          }
-          seenObjects.add(value);
-          try {
-            return [true, Object.entries(value).reduce((sum, [key, nestedValue], idx, arr) => {
-              let [valid, size] = getJsonSerializableInfo(nestedValue, skipSizing);
-              if (!valid) {
-                throw new Error('JSON validation did not pass. Validation process stopped.');
-              }
-              seenObjects.delete(value);
-              if (skipSizing) {
-                return 0;
-              }
-              const keySize = Array.isArray(value) ? 0 : key.length + misc_1.JsonSize.Comma + misc_1.JsonSize.Colon * 2;
-              const separator = idx < arr.length - 1 ? misc_1.JsonSize.Comma : 0;
-              return sum + keySize + size + separator;
-            }, skipSizing ? 0 : misc_1.JsonSize.Wrapper * 2)];
-          } catch (_) {
-            return [false, 0];
-          }
-        }
-        return getJsonSerializableInfo(jsObject, skipSizingProcess);
-      }
-      exports.validateJsonAndGetSize = validateJsonAndGetSize;
-    }, {
-      "./assert": 5,
-      "./misc": 15,
-      "superstruct": 20
-    }],
-    14: [function (require, module, exports) {
-      "use strict";
-
-      var __importDefault = this && this.__importDefault || function (mod) {
-        return mod && mod.__esModule ? mod : {
-          "default": mod
-        };
-      };
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.createModuleLogger = exports.createProjectLogger = void 0;
-      const debug_1 = __importDefault(require("debug"));
-      const globalLogger = (0, debug_1.default)('metamask');
-      function createProjectLogger(projectName) {
-        return globalLogger.extend(projectName);
-      }
-      exports.createProjectLogger = createProjectLogger;
-      function createModuleLogger(projectLogger, moduleName) {
-        return projectLogger.extend(moduleName);
-      }
-      exports.createModuleLogger = createModuleLogger;
-    }, {
-      "debug": 24
-    }],
-    15: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.calculateNumberSize = exports.calculateStringSize = exports.isASCII = exports.isPlainObject = exports.ESCAPE_CHARACTERS_REGEXP = exports.JsonSize = exports.hasProperty = exports.isObject = exports.isNullOrUndefined = exports.isNonEmptyArray = void 0;
-      function isNonEmptyArray(value) {
-        return Array.isArray(value) && value.length > 0;
-      }
-      exports.isNonEmptyArray = isNonEmptyArray;
-      function isNullOrUndefined(value) {
-        return value === null || value === undefined;
-      }
-      exports.isNullOrUndefined = isNullOrUndefined;
-      function isObject(value) {
-        return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-      }
-      exports.isObject = isObject;
-      const hasProperty = (objectToCheck, name) => Object.hasOwnProperty.call(objectToCheck, name);
-      exports.hasProperty = hasProperty;
-      var JsonSize;
-      (function (JsonSize) {
-        JsonSize[JsonSize["Null"] = 4] = "Null";
-        JsonSize[JsonSize["Comma"] = 1] = "Comma";
-        JsonSize[JsonSize["Wrapper"] = 1] = "Wrapper";
-        JsonSize[JsonSize["True"] = 4] = "True";
-        JsonSize[JsonSize["False"] = 5] = "False";
-        JsonSize[JsonSize["Quote"] = 1] = "Quote";
-        JsonSize[JsonSize["Colon"] = 1] = "Colon";
-        JsonSize[JsonSize["Date"] = 24] = "Date";
-      })(JsonSize = exports.JsonSize || (exports.JsonSize = {}));
-      exports.ESCAPE_CHARACTERS_REGEXP = /"|\\|\n|\r|\t/gu;
-      function isPlainObject(value) {
-        if (typeof value !== 'object' || value === null) {
-          return false;
-        }
-        try {
-          let proto = value;
-          while (Object.getPrototypeOf(proto) !== null) {
-            proto = Object.getPrototypeOf(proto);
-          }
-          return Object.getPrototypeOf(value) === proto;
-        } catch (_) {
-          return false;
-        }
-      }
-      exports.isPlainObject = isPlainObject;
-      function isASCII(character) {
-        return character.charCodeAt(0) <= 127;
-      }
-      exports.isASCII = isASCII;
-      function calculateStringSize(value) {
-        var _a;
-        const size = value.split('').reduce((total, character) => {
-          if (isASCII(character)) {
-            return total + 1;
-          }
-          return total + 2;
-        }, 0);
-        return size + ((_a = value.match(exports.ESCAPE_CHARACTERS_REGEXP)) !== null && _a !== void 0 ? _a : []).length;
-      }
-      exports.calculateStringSize = calculateStringSize;
-      function calculateNumberSize(value) {
-        return value.toString().length;
-      }
-      exports.calculateNumberSize = calculateNumberSize;
-    }, {}],
-    16: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.hexToBigInt = exports.hexToNumber = exports.bigIntToHex = exports.numberToHex = void 0;
-      const assert_1 = require("./assert");
-      const hex_1 = require("./hex");
-      const numberToHex = value => {
-        (0, assert_1.assert)(typeof value === 'number', 'Value must be a number.');
-        (0, assert_1.assert)(value >= 0, 'Value must be a non-negative number.');
-        (0, assert_1.assert)(Number.isSafeInteger(value), 'Value is not a safe integer. Use `bigIntToHex` instead.');
-        return (0, hex_1.add0x)(value.toString(16));
-      };
-      exports.numberToHex = numberToHex;
-      const bigIntToHex = value => {
-        (0, assert_1.assert)(typeof value === 'bigint', 'Value must be a bigint.');
-        (0, assert_1.assert)(value >= 0, 'Value must be a non-negative bigint.');
-        return (0, hex_1.add0x)(value.toString(16));
-      };
-      exports.bigIntToHex = bigIntToHex;
-      const hexToNumber = value => {
-        (0, hex_1.assertIsHexString)(value);
-        const numberValue = parseInt(value, 16);
-        (0, assert_1.assert)(Number.isSafeInteger(numberValue), 'Value is not a safe integer. Use `hexToBigInt` instead.');
-        return numberValue;
-      };
-      exports.hexToNumber = hexToNumber;
-      const hexToBigInt = value => {
-        (0, hex_1.assertIsHexString)(value);
-        return BigInt((0, hex_1.add0x)(value));
-      };
-      exports.hexToBigInt = hexToBigInt;
-    }, {
-      "./assert": 5,
-      "./hex": 11
-    }],
-    17: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-    }, {}],
-    18: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.timeSince = exports.inMilliseconds = exports.Duration = void 0;
-      var Duration;
-      (function (Duration) {
-        Duration[Duration["Millisecond"] = 1] = "Millisecond";
-        Duration[Duration["Second"] = 1000] = "Second";
-        Duration[Duration["Minute"] = 60000] = "Minute";
-        Duration[Duration["Hour"] = 3600000] = "Hour";
-        Duration[Duration["Day"] = 86400000] = "Day";
-        Duration[Duration["Week"] = 604800000] = "Week";
-        Duration[Duration["Year"] = 31536000000] = "Year";
-      })(Duration = exports.Duration || (exports.Duration = {}));
-      const isNonNegativeInteger = number => Number.isInteger(number) && number >= 0;
-      const assertIsNonNegativeInteger = (number, name) => {
-        if (!isNonNegativeInteger(number)) {
-          throw new Error(`"${name}" must be a non-negative integer. Received: "${number}".`);
-        }
-      };
-      function inMilliseconds(count, duration) {
-        assertIsNonNegativeInteger(count, 'count');
-        return count * duration;
-      }
-      exports.inMilliseconds = inMilliseconds;
-      function timeSince(timestamp) {
-        assertIsNonNegativeInteger(timestamp, 'timestamp');
-        return Date.now() - timestamp;
-      }
-      exports.timeSince = timeSince;
-    }, {}],
-    19: [function (require, module, exports) {
-      "use strict";
-
-      Object.defineProperty(exports, "__esModule", {
-        value: true
-      });
-      exports.satisfiesVersionRange = exports.gtRange = exports.gtVersion = exports.assertIsSemVerRange = exports.assertIsSemVerVersion = exports.isValidSemVerRange = exports.isValidSemVerVersion = exports.VersionRangeStruct = exports.VersionStruct = void 0;
-      const semver_1 = require("semver");
-      const superstruct_1 = require("superstruct");
-      const assert_1 = require("./assert");
-      exports.VersionStruct = (0, superstruct_1.refine)((0, superstruct_1.string)(), 'Version', value => {
-        if ((0, semver_1.valid)(value) === null) {
-          return `Expected SemVer version, got "${value}"`;
-        }
-        return true;
-      });
-      exports.VersionRangeStruct = (0, superstruct_1.refine)((0, superstruct_1.string)(), 'Version range', value => {
-        if ((0, semver_1.validRange)(value) === null) {
-          return `Expected SemVer range, got "${value}"`;
-        }
-        return true;
-      });
-      function isValidSemVerVersion(version) {
-        return (0, superstruct_1.is)(version, exports.VersionStruct);
-      }
-      exports.isValidSemVerVersion = isValidSemVerVersion;
-      function isValidSemVerRange(versionRange) {
-        return (0, superstruct_1.is)(versionRange, exports.VersionRangeStruct);
-      }
-      exports.isValidSemVerRange = isValidSemVerRange;
-      function assertIsSemVerVersion(version) {
-        (0, assert_1.assertStruct)(version, exports.VersionStruct);
-      }
-      exports.assertIsSemVerVersion = assertIsSemVerVersion;
-      function assertIsSemVerRange(range) {
-        (0, assert_1.assertStruct)(range, exports.VersionRangeStruct);
-      }
-      exports.assertIsSemVerRange = assertIsSemVerRange;
-      function gtVersion(version1, version2) {
-        return (0, semver_1.gt)(version1, version2);
-      }
-      exports.gtVersion = gtVersion;
-      function gtRange(version, range) {
-        return (0, semver_1.gtr)(version, range);
-      }
-      exports.gtRange = gtRange;
-      function satisfiesVersionRange(version, versionRange) {
-        return (0, semver_1.satisfies)(version, versionRange, {
-          includePrerelease: true
-        });
-      }
-      exports.satisfiesVersionRange = satisfiesVersionRange;
-    }, {
-      "./assert": 5,
-      "semver": 56,
-      "superstruct": 20
-    }],
-    20: [function (require, module, exports) {
-      (function (global, factory) {
-        typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Superstruct = {}));
-      })(this, function (exports) {
-        'use strict';
-
-        class StructError extends TypeError {
-          constructor(failure, failures) {
-            let cached;
-            const {
-              message,
-              explanation,
-              ...rest
-            } = failure;
-            const {
-              path
-            } = failure;
-            const msg = path.length === 0 ? message : `At path: ${path.join('.')} -- ${message}`;
-            super(explanation ?? msg);
-            if (explanation != null) this.cause = msg;
-            Object.assign(this, rest);
-            this.name = this.constructor.name;
-            this.failures = () => {
-              return cached ?? (cached = [failure, ...failures()]);
-            };
-          }
-        }
-        function isIterable(x) {
-          return isObject(x) && typeof x[Symbol.iterator] === 'function';
-        }
-        function isObject(x) {
-          return typeof x === 'object' && x != null;
-        }
-        function isPlainObject(x) {
-          if (Object.prototype.toString.call(x) !== '[object Object]') {
-            return false;
-          }
-          const prototype = Object.getPrototypeOf(x);
-          return prototype === null || prototype === Object.prototype;
-        }
-        function print(value) {
-          if (typeof value === 'symbol') {
-            return value.toString();
-          }
-          return typeof value === 'string' ? JSON.stringify(value) : `${value}`;
-        }
-        function shiftIterator(input) {
-          const {
-            done,
-            value
-          } = input.next();
-          return done ? undefined : value;
-        }
-        function toFailure(result, context, struct, value) {
-          if (result === true) {
-            return;
-          } else if (result === false) {
-            result = {};
-          } else if (typeof result === 'string') {
-            result = {
-              message: result
-            };
-          }
-          const {
-            path,
-            branch
-          } = context;
-          const {
-            type
-          } = struct;
-          const {
-            refinement,
-            message = `Expected a value of type \`${type}\`${refinement ? ` with refinement \`${refinement}\`` : ''}, but received: \`${print(value)}\``
-          } = result;
-          return {
-            value,
-            type,
-            refinement,
-            key: path[path.length - 1],
-            path,
-            branch,
-            ...result,
-            message
-          };
-        }
-        function* toFailures(result, context, struct, value) {
-          if (!isIterable(result)) {
-            result = [result];
-          }
-          for (const r of result) {
-            const failure = toFailure(r, context, struct, value);
-            if (failure) {
-              yield failure;
-            }
-          }
-        }
-        function* run(value, struct, options = {}) {
-          const {
-            path = [],
-            branch = [value],
-            coerce = false,
-            mask = false
-          } = options;
-          const ctx = {
-            path,
-            branch
-          };
-          if (coerce) {
-            value = struct.coercer(value, ctx);
-            if (mask && struct.type !== 'type' && isObject(struct.schema) && isObject(value) && !Array.isArray(value)) {
-              for (const key in value) {
-                if (struct.schema[key] === undefined) {
-                  delete value[key];
-                }
-              }
-            }
-          }
-          let status = 'valid';
-          for (const failure of struct.validator(value, ctx)) {
-            failure.explanation = options.message;
-            status = 'not_valid';
-            yield [failure, undefined];
-          }
-          for (let [k, v, s] of struct.entries(value, ctx)) {
-            const ts = run(v, s, {
-              path: k === undefined ? path : [...path, k],
-              branch: k === undefined ? branch : [...branch, v],
-              coerce,
-              mask,
-              message: options.message
-            });
-            for (const t of ts) {
-              if (t[0]) {
-                status = t[0].refinement != null ? 'not_refined' : 'not_valid';
-                yield [t[0], undefined];
-              } else if (coerce) {
-                v = t[1];
-                if (k === undefined) {
-                  value = v;
-                } else if (value instanceof Map) {
-                  value.set(k, v);
-                } else if (value instanceof Set) {
-                  value.add(v);
-                } else if (isObject(value)) {
-                  if (v !== undefined || k in value) value[k] = v;
-                }
-              }
-            }
-          }
-          if (status !== 'not_valid') {
-            for (const failure of struct.refiner(value, ctx)) {
-              failure.explanation = options.message;
-              status = 'not_refined';
-              yield [failure, undefined];
-            }
-          }
-          if (status === 'valid') {
-            yield [undefined, value];
-          }
-        }
-        class Struct {
-          constructor(props) {
-            const {
-              type,
-              schema,
-              validator,
-              refiner,
-              coercer = value => value,
-              entries = function* () {}
-            } = props;
-            this.type = type;
-            this.schema = schema;
-            this.entries = entries;
-            this.coercer = coercer;
-            if (validator) {
-              this.validator = (value, context) => {
-                const result = validator(value, context);
-                return toFailures(result, context, this, value);
-              };
-            } else {
-              this.validator = () => [];
-            }
-            if (refiner) {
-              this.refiner = (value, context) => {
-                const result = refiner(value, context);
-                return toFailures(result, context, this, value);
-              };
-            } else {
-              this.refiner = () => [];
-            }
-          }
-          assert(value, message) {
-            return assert(value, this, message);
-          }
-          create(value, message) {
-            return create(value, this, message);
-          }
-          is(value) {
-            return is(value, this);
-          }
-          mask(value, message) {
-            return mask(value, this, message);
-          }
-          validate(value, options = {}) {
-            return validate(value, this, options);
-          }
-        }
-        function assert(value, struct, message) {
-          const result = validate(value, struct, {
-            message
-          });
-          if (result[0]) {
-            throw result[0];
-          }
-        }
-        function create(value, struct, message) {
-          const result = validate(value, struct, {
-            coerce: true,
-            message
-          });
-          if (result[0]) {
-            throw result[0];
-          } else {
-            return result[1];
-          }
-        }
-        function mask(value, struct, message) {
-          const result = validate(value, struct, {
-            coerce: true,
-            mask: true,
-            message
-          });
-          if (result[0]) {
-            throw result[0];
-          } else {
-            return result[1];
-          }
-        }
-        function is(value, struct) {
-          const result = validate(value, struct);
-          return !result[0];
-        }
-        function validate(value, struct, options = {}) {
-          const tuples = run(value, struct, options);
-          const tuple = shiftIterator(tuples);
-          if (tuple[0]) {
-            const error = new StructError(tuple[0], function* () {
-              for (const t of tuples) {
-                if (t[0]) {
-                  yield t[0];
-                }
-              }
-            });
-            return [error, undefined];
-          } else {
-            const v = tuple[1];
-            return [undefined, v];
-          }
-        }
-        function assign(...Structs) {
-          const isType = Structs[0].type === 'type';
-          const schemas = Structs.map(s => s.schema);
-          const schema = Object.assign({}, ...schemas);
-          return isType ? type(schema) : object(schema);
-        }
-        function define(name, validator) {
-          return new Struct({
-            type: name,
-            schema: null,
-            validator
-          });
-        }
-        function deprecated(struct, log) {
-          return new Struct({
-            ...struct,
-            refiner: (value, ctx) => value === undefined || struct.refiner(value, ctx),
-            validator(value, ctx) {
-              if (value === undefined) {
-                return true;
-              } else {
-                log(value, ctx);
-                return struct.validator(value, ctx);
-              }
-            }
-          });
-        }
-        function dynamic(fn) {
-          return new Struct({
-            type: 'dynamic',
-            schema: null,
-            *entries(value, ctx) {
-              const struct = fn(value, ctx);
-              yield* struct.entries(value, ctx);
-            },
-            validator(value, ctx) {
-              const struct = fn(value, ctx);
-              return struct.validator(value, ctx);
-            },
-            coercer(value, ctx) {
-              const struct = fn(value, ctx);
-              return struct.coercer(value, ctx);
-            },
-            refiner(value, ctx) {
-              const struct = fn(value, ctx);
-              return struct.refiner(value, ctx);
-            }
-          });
-        }
-        function lazy(fn) {
-          let struct;
-          return new Struct({
-            type: 'lazy',
-            schema: null,
-            *entries(value, ctx) {
-              struct ?? (struct = fn());
-              yield* struct.entries(value, ctx);
-            },
-            validator(value, ctx) {
-              struct ?? (struct = fn());
-              return struct.validator(value, ctx);
-            },
-            coercer(value, ctx) {
-              struct ?? (struct = fn());
-              return struct.coercer(value, ctx);
-            },
-            refiner(value, ctx) {
-              struct ?? (struct = fn());
-              return struct.refiner(value, ctx);
-            }
-          });
-        }
-        function omit(struct, keys) {
-          const {
-            schema
-          } = struct;
-          const subschema = {
-            ...schema
-          };
-          for (const key of keys) {
-            delete subschema[key];
-          }
-          switch (struct.type) {
-            case 'type':
-              return type(subschema);
-            default:
-              return object(subschema);
-          }
-        }
-        function partial(struct) {
-          const schema = struct instanceof Struct ? {
-            ...struct.schema
-          } : {
-            ...struct
-          };
-          for (const key in schema) {
-            schema[key] = optional(schema[key]);
-          }
-          return object(schema);
-        }
-        function pick(struct, keys) {
-          const {
-            schema
-          } = struct;
-          const subschema = {};
-          for (const key of keys) {
-            subschema[key] = schema[key];
-          }
-          return object(subschema);
-        }
-        function struct(name, validator) {
-          console.warn('superstruct@0.11 - The `struct` helper has been renamed to `define`.');
-          return define(name, validator);
-        }
-        function any() {
-          return define('any', () => true);
-        }
-        function array(Element) {
-          return new Struct({
-            type: 'array',
-            schema: Element,
-            *entries(value) {
-              if (Element && Array.isArray(value)) {
-                for (const [i, v] of value.entries()) {
-                  yield [i, v, Element];
-                }
-              }
-            },
-            coercer(value) {
-              return Array.isArray(value) ? value.slice() : value;
-            },
-            validator(value) {
-              return Array.isArray(value) || `Expected an array value, but received: ${print(value)}`;
-            }
-          });
-        }
-        function bigint() {
-          return define('bigint', value => {
-            return typeof value === 'bigint';
-          });
-        }
-        function boolean() {
-          return define('boolean', value => {
-            return typeof value === 'boolean';
-          });
-        }
-        function date() {
-          return define('date', value => {
-            return value instanceof Date && !isNaN(value.getTime()) || `Expected a valid \`Date\` object, but received: ${print(value)}`;
-          });
-        }
-        function enums(values) {
-          const schema = {};
-          const description = values.map(v => print(v)).join();
-          for (const key of values) {
-            schema[key] = key;
-          }
-          return new Struct({
-            type: 'enums',
-            schema,
-            validator(value) {
-              return values.includes(value) || `Expected one of \`${description}\`, but received: ${print(value)}`;
-            }
-          });
-        }
-        function func() {
-          return define('func', value => {
-            return typeof value === 'function' || `Expected a function, but received: ${print(value)}`;
-          });
-        }
-        function instance(Class) {
-          return define('instance', value => {
-            return value instanceof Class || `Expected a \`${Class.name}\` instance, but received: ${print(value)}`;
-          });
-        }
-        function integer() {
-          return define('integer', value => {
-            return typeof value === 'number' && !isNaN(value) && Number.isInteger(value) || `Expected an integer, but received: ${print(value)}`;
-          });
-        }
-        function intersection(Structs) {
-          return new Struct({
-            type: 'intersection',
-            schema: null,
-            *entries(value, ctx) {
-              for (const S of Structs) {
-                yield* S.entries(value, ctx);
-              }
-            },
-            *validator(value, ctx) {
-              for (const S of Structs) {
-                yield* S.validator(value, ctx);
-              }
-            },
-            *refiner(value, ctx) {
-              for (const S of Structs) {
-                yield* S.refiner(value, ctx);
-              }
-            }
-          });
-        }
-        function literal(constant) {
-          const description = print(constant);
-          const t = typeof constant;
-          return new Struct({
-            type: 'literal',
-            schema: t === 'string' || t === 'number' || t === 'boolean' ? constant : null,
-            validator(value) {
-              return value === constant || `Expected the literal \`${description}\`, but received: ${print(value)}`;
-            }
-          });
-        }
-        function map(Key, Value) {
-          return new Struct({
-            type: 'map',
-            schema: null,
-            *entries(value) {
-              if (Key && Value && value instanceof Map) {
-                for (const [k, v] of value.entries()) {
-                  yield [k, k, Key];
-                  yield [k, v, Value];
-                }
-              }
-            },
-            coercer(value) {
-              return value instanceof Map ? new Map(value) : value;
-            },
-            validator(value) {
-              return value instanceof Map || `Expected a \`Map\` object, but received: ${print(value)}`;
-            }
-          });
-        }
-        function never() {
-          return define('never', () => false);
-        }
-        function nullable(struct) {
-          return new Struct({
-            ...struct,
-            validator: (value, ctx) => value === null || struct.validator(value, ctx),
-            refiner: (value, ctx) => value === null || struct.refiner(value, ctx)
-          });
-        }
-        function number() {
-          return define('number', value => {
-            return typeof value === 'number' && !isNaN(value) || `Expected a number, but received: ${print(value)}`;
-          });
-        }
-        function object(schema) {
-          const knowns = schema ? Object.keys(schema) : [];
-          const Never = never();
-          return new Struct({
-            type: 'object',
-            schema: schema ? schema : null,
-            *entries(value) {
-              if (schema && isObject(value)) {
-                const unknowns = new Set(Object.keys(value));
-                for (const key of knowns) {
-                  unknowns.delete(key);
-                  yield [key, value[key], schema[key]];
-                }
-                for (const key of unknowns) {
-                  yield [key, value[key], Never];
-                }
-              }
-            },
-            validator(value) {
-              return isObject(value) || `Expected an object, but received: ${print(value)}`;
-            },
-            coercer(value) {
-              return isObject(value) ? {
-                ...value
-              } : value;
-            }
-          });
-        }
-        function optional(struct) {
-          return new Struct({
-            ...struct,
-            validator: (value, ctx) => value === undefined || struct.validator(value, ctx),
-            refiner: (value, ctx) => value === undefined || struct.refiner(value, ctx)
-          });
-        }
-        function record(Key, Value) {
-          return new Struct({
-            type: 'record',
-            schema: null,
-            *entries(value) {
-              if (isObject(value)) {
-                for (const k in value) {
-                  const v = value[k];
-                  yield [k, k, Key];
-                  yield [k, v, Value];
-                }
-              }
-            },
-            validator(value) {
-              return isObject(value) || `Expected an object, but received: ${print(value)}`;
-            }
-          });
-        }
-        function regexp() {
-          return define('regexp', value => {
-            return value instanceof RegExp;
-          });
-        }
-        function set(Element) {
-          return new Struct({
-            type: 'set',
-            schema: null,
-            *entries(value) {
-              if (Element && value instanceof Set) {
-                for (const v of value) {
-                  yield [v, v, Element];
-                }
-              }
-            },
-            coercer(value) {
-              return value instanceof Set ? new Set(value) : value;
-            },
-            validator(value) {
-              return value instanceof Set || `Expected a \`Set\` object, but received: ${print(value)}`;
-            }
-          });
-        }
-        function string() {
-          return define('string', value => {
-            return typeof value === 'string' || `Expected a string, but received: ${print(value)}`;
-          });
-        }
-        function tuple(Structs) {
-          const Never = never();
-          return new Struct({
-            type: 'tuple',
-            schema: null,
-            *entries(value) {
-              if (Array.isArray(value)) {
-                const length = Math.max(Structs.length, value.length);
-                for (let i = 0; i < length; i++) {
-                  yield [i, value[i], Structs[i] || Never];
-                }
-              }
-            },
-            validator(value) {
-              return Array.isArray(value) || `Expected an array, but received: ${print(value)}`;
-            }
-          });
-        }
-        function type(schema) {
-          const keys = Object.keys(schema);
-          return new Struct({
-            type: 'type',
-            schema,
-            *entries(value) {
-              if (isObject(value)) {
-                for (const k of keys) {
-                  yield [k, value[k], schema[k]];
-                }
-              }
-            },
-            validator(value) {
-              return isObject(value) || `Expected an object, but received: ${print(value)}`;
-            },
-            coercer(value) {
-              return isObject(value) ? {
-                ...value
-              } : value;
-            }
-          });
-        }
-        function union(Structs) {
-          const description = Structs.map(s => s.type).join(' | ');
-          return new Struct({
-            type: 'union',
-            schema: null,
-            coercer(value) {
-              for (const S of Structs) {
-                const [error, coerced] = S.validate(value, {
-                  coerce: true
-                });
-                if (!error) {
-                  return coerced;
-                }
-              }
-              return value;
-            },
-            validator(value, ctx) {
-              const failures = [];
-              for (const S of Structs) {
-                const [...tuples] = run(value, S, ctx);
-                const [first] = tuples;
-                if (!first[0]) {
-                  return [];
-                } else {
-                  for (const [failure] of tuples) {
-                    if (failure) {
-                      failures.push(failure);
-                    }
-                  }
-                }
-              }
-              return [`Expected the value to satisfy a union of \`${description}\`, but received: ${print(value)}`, ...failures];
-            }
-          });
-        }
-        function unknown() {
-          return define('unknown', () => true);
-        }
-        function coerce(struct, condition, coercer) {
-          return new Struct({
-            ...struct,
-            coercer: (value, ctx) => {
-              return is(value, condition) ? struct.coercer(coercer(value, ctx), ctx) : struct.coercer(value, ctx);
-            }
-          });
-        }
-        function defaulted(struct, fallback, options = {}) {
-          return coerce(struct, unknown(), x => {
-            const f = typeof fallback === 'function' ? fallback() : fallback;
-            if (x === undefined) {
-              return f;
-            }
-            if (!options.strict && isPlainObject(x) && isPlainObject(f)) {
-              const ret = {
-                ...x
-              };
-              let changed = false;
-              for (const key in f) {
-                if (ret[key] === undefined) {
-                  ret[key] = f[key];
-                  changed = true;
-                }
-              }
-              if (changed) {
-                return ret;
-              }
-            }
-            return x;
-          });
-        }
-        function trimmed(struct) {
-          return coerce(struct, string(), x => x.trim());
-        }
-        function empty(struct) {
-          return refine(struct, 'empty', value => {
-            const size = getSize(value);
-            return size === 0 || `Expected an empty ${struct.type} but received one with a size of \`${size}\``;
-          });
-        }
-        function getSize(value) {
-          if (value instanceof Map || value instanceof Set) {
-            return value.size;
-          } else {
-            return value.length;
-          }
-        }
-        function max(struct, threshold, options = {}) {
-          const {
-            exclusive
-          } = options;
-          return refine(struct, 'max', value => {
-            return exclusive ? value < threshold : value <= threshold || `Expected a ${struct.type} less than ${exclusive ? '' : 'or equal to '}${threshold} but received \`${value}\``;
-          });
-        }
-        function min(struct, threshold, options = {}) {
-          const {
-            exclusive
-          } = options;
-          return refine(struct, 'min', value => {
-            return exclusive ? value > threshold : value >= threshold || `Expected a ${struct.type} greater than ${exclusive ? '' : 'or equal to '}${threshold} but received \`${value}\``;
-          });
-        }
-        function nonempty(struct) {
-          return refine(struct, 'nonempty', value => {
-            const size = getSize(value);
-            return size > 0 || `Expected a nonempty ${struct.type} but received an empty one`;
-          });
-        }
-        function pattern(struct, regexp) {
-          return refine(struct, 'pattern', value => {
-            return regexp.test(value) || `Expected a ${struct.type} matching \`/${regexp.source}/\` but received "${value}"`;
-          });
-        }
-        function size(struct, min, max = min) {
-          const expected = `Expected a ${struct.type}`;
-          const of = min === max ? `of \`${min}\`` : `between \`${min}\` and \`${max}\``;
-          return refine(struct, 'size', value => {
-            if (typeof value === 'number' || value instanceof Date) {
-              return min <= value && value <= max || `${expected} ${of} but received \`${value}\``;
-            } else if (value instanceof Map || value instanceof Set) {
-              const {
-                size
-              } = value;
-              return min <= size && size <= max || `${expected} with a size ${of} but received one with a size of \`${size}\``;
-            } else {
-              const {
-                length
-              } = value;
-              return min <= length && length <= max || `${expected} with a length ${of} but received one with a length of \`${length}\``;
-            }
-          });
-        }
-        function refine(struct, name, refiner) {
-          return new Struct({
-            ...struct,
-            *refiner(value, ctx) {
-              yield* struct.refiner(value, ctx);
-              const result = refiner(value, ctx);
-              const failures = toFailures(result, ctx, struct, value);
-              for (const failure of failures) {
-                yield {
-                  ...failure,
-                  refinement: name
-                };
-              }
-            }
-          });
-        }
-        exports.Struct = Struct;
-        exports.StructError = StructError;
-        exports.any = any;
-        exports.array = array;
-        exports.assert = assert;
-        exports.assign = assign;
-        exports.bigint = bigint;
-        exports.boolean = boolean;
-        exports.coerce = coerce;
-        exports.create = create;
-        exports.date = date;
-        exports.defaulted = defaulted;
-        exports.define = define;
-        exports.deprecated = deprecated;
-        exports.dynamic = dynamic;
-        exports.empty = empty;
-        exports.enums = enums;
-        exports.func = func;
-        exports.instance = instance;
-        exports.integer = integer;
-        exports.intersection = intersection;
-        exports.is = is;
-        exports.lazy = lazy;
-        exports.literal = literal;
-        exports.map = map;
-        exports.mask = mask;
-        exports.max = max;
-        exports.min = min;
-        exports.never = never;
-        exports.nonempty = nonempty;
-        exports.nullable = nullable;
-        exports.number = number;
-        exports.object = object;
-        exports.omit = omit;
-        exports.optional = optional;
-        exports.partial = partial;
-        exports.pattern = pattern;
-        exports.pick = pick;
-        exports.record = record;
-        exports.refine = refine;
-        exports.regexp = regexp;
-        exports.set = set;
-        exports.size = size;
-        exports.string = string;
-        exports.struct = struct;
-        exports.trimmed = trimmed;
-        exports.tuple = tuple;
-        exports.type = type;
-        exports.union = union;
-        exports.unknown = unknown;
-        exports.validate = validate;
-      });
-    }, {}],
-    21: [function (require, module, exports) {
       'use strict';
 
       exports.byteLength = byteLength;
@@ -2096,7 +136,7 @@
         return parts.join('');
       }
     }, {}],
-    22: [function (require, module, exports) {
+    2: [function (require, module, exports) {
       (function () {
         (function () {
           'use strict';
@@ -3411,11 +1451,2203 @@
         }).call(this);
       }).call(this, require("buffer").Buffer);
     }, {
-      "base64-js": 21,
-      "buffer": 22,
-      "ieee754": 26
+      "base64-js": 1,
+      "buffer": 2,
+      "ieee754": 3
     }],
+    3: [function (require, module, exports) {
+      exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+        var e, m;
+        var eLen = nBytes * 8 - mLen - 1;
+        var eMax = (1 << eLen) - 1;
+        var eBias = eMax >> 1;
+        var nBits = -7;
+        var i = isLE ? nBytes - 1 : 0;
+        var d = isLE ? -1 : 1;
+        var s = buffer[offset + i];
+        i += d;
+        e = s & (1 << -nBits) - 1;
+        s >>= -nBits;
+        nBits += eLen;
+        for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+        m = e & (1 << -nBits) - 1;
+        e >>= -nBits;
+        nBits += mLen;
+        for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+        if (e === 0) {
+          e = 1 - eBias;
+        } else if (e === eMax) {
+          return m ? NaN : (s ? -1 : 1) * Infinity;
+        } else {
+          m = m + Math.pow(2, mLen);
+          e = e - eBias;
+        }
+        return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+      };
+      exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+        var e, m, c;
+        var eLen = nBytes * 8 - mLen - 1;
+        var eMax = (1 << eLen) - 1;
+        var eBias = eMax >> 1;
+        var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
+        var i = isLE ? 0 : nBytes - 1;
+        var d = isLE ? 1 : -1;
+        var s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
+        value = Math.abs(value);
+        if (isNaN(value) || value === Infinity) {
+          m = isNaN(value) ? 1 : 0;
+          e = eMax;
+        } else {
+          e = Math.floor(Math.log(value) / Math.LN2);
+          if (value * (c = Math.pow(2, -e)) < 1) {
+            e--;
+            c *= 2;
+          }
+          if (e + eBias >= 1) {
+            value += rt / c;
+          } else {
+            value += rt * Math.pow(2, 1 - eBias);
+          }
+          if (value * c >= 2) {
+            e++;
+            c /= 2;
+          }
+          if (e + eBias >= eMax) {
+            m = 0;
+            e = eMax;
+          } else if (e + eBias >= 1) {
+            m = (value * c - 1) * Math.pow(2, mLen);
+            e = e + eBias;
+          } else {
+            m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+            e = 0;
+          }
+        }
+        for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+        e = e << mLen | m;
+        eLen += mLen;
+        for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+        buffer[offset + i - d] |= s * 128;
+      };
+    }, {}],
+    4: [function (require, module, exports) {
+      var process = module.exports = {};
+      var cachedSetTimeout;
+      var cachedClearTimeout;
+      function defaultSetTimout() {
+        throw new Error('setTimeout has not been defined');
+      }
+      function defaultClearTimeout() {
+        throw new Error('clearTimeout has not been defined');
+      }
+      (function () {
+        try {
+          if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+          } else {
+            cachedSetTimeout = defaultSetTimout;
+          }
+        } catch (e) {
+          cachedSetTimeout = defaultSetTimout;
+        }
+        try {
+          if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+          } else {
+            cachedClearTimeout = defaultClearTimeout;
+          }
+        } catch (e) {
+          cachedClearTimeout = defaultClearTimeout;
+        }
+      })();
+      function runTimeout(fun) {
+        if (cachedSetTimeout === setTimeout) {
+          return setTimeout(fun, 0);
+        }
+        if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+          cachedSetTimeout = setTimeout;
+          return setTimeout(fun, 0);
+        }
+        try {
+          return cachedSetTimeout(fun, 0);
+        } catch (e) {
+          try {
+            return cachedSetTimeout.call(null, fun, 0);
+          } catch (e) {
+            return cachedSetTimeout.call(this, fun, 0);
+          }
+        }
+      }
+      function runClearTimeout(marker) {
+        if (cachedClearTimeout === clearTimeout) {
+          return clearTimeout(marker);
+        }
+        if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+          cachedClearTimeout = clearTimeout;
+          return clearTimeout(marker);
+        }
+        try {
+          return cachedClearTimeout(marker);
+        } catch (e) {
+          try {
+            return cachedClearTimeout.call(null, marker);
+          } catch (e) {
+            return cachedClearTimeout.call(this, marker);
+          }
+        }
+      }
+      var queue = [];
+      var draining = false;
+      var currentQueue;
+      var queueIndex = -1;
+      function cleanUpNextTick() {
+        if (!draining || !currentQueue) {
+          return;
+        }
+        draining = false;
+        if (currentQueue.length) {
+          queue = currentQueue.concat(queue);
+        } else {
+          queueIndex = -1;
+        }
+        if (queue.length) {
+          drainQueue();
+        }
+      }
+      function drainQueue() {
+        if (draining) {
+          return;
+        }
+        var timeout = runTimeout(cleanUpNextTick);
+        draining = true;
+        var len = queue.length;
+        while (len) {
+          currentQueue = queue;
+          queue = [];
+          while (++queueIndex < len) {
+            if (currentQueue) {
+              currentQueue[queueIndex].run();
+            }
+          }
+          queueIndex = -1;
+          len = queue.length;
+        }
+        currentQueue = null;
+        draining = false;
+        runClearTimeout(timeout);
+      }
+      process.nextTick = function (fun) {
+        var args = new Array(arguments.length - 1);
+        if (arguments.length > 1) {
+          for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+          }
+        }
+        queue.push(new Item(fun, args));
+        if (queue.length === 1 && !draining) {
+          runTimeout(drainQueue);
+        }
+      };
+      function Item(fun, array) {
+        this.fun = fun;
+        this.array = array;
+      }
+      Item.prototype.run = function () {
+        this.fun.apply(null, this.array);
+      };
+      process.title = 'browser';
+      process.browser = true;
+      process.env = {};
+      process.argv = [];
+      process.version = '';
+      process.versions = {};
+      function noop() {}
+      process.on = noop;
+      process.addListener = noop;
+      process.once = noop;
+      process.off = noop;
+      process.removeListener = noop;
+      process.removeAllListeners = noop;
+      process.emit = noop;
+      process.prependListener = noop;
+      process.prependOnceListener = noop;
+      process.listeners = function (name) {
+        return [];
+      };
+      process.binding = function (name) {
+        throw new Error('process.binding is not supported');
+      };
+      process.cwd = function () {
+        return '/';
+      };
+      process.chdir = function (dir) {
+        throw new Error('process.chdir is not supported');
+      };
+      process.umask = function () {
+        return 0;
+      };
+    }, {}],
+    5: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.text = exports.spinner = exports.panel = exports.heading = exports.divider = exports.copyable = void 0;
+      const utils_1 = require("@metamask/utils");
+      const nodes_1 = require("./nodes");
+      function createBuilder(type, struct, keys = []) {
+        return (...args) => {
+          if (args.length === 1 && (0, utils_1.isPlainObject)(args[0])) {
+            const node = Object.assign(Object.assign({}, args[0]), {
+              type
+            });
+            (0, utils_1.assertStruct)(node, struct, `Invalid ${type} component`);
+            return node;
+          }
+          const node = keys.reduce((partialNode, key, index) => {
+            return Object.assign(Object.assign({}, partialNode), {
+              [key]: args[index]
+            });
+          }, {
+            type
+          });
+          (0, utils_1.assertStruct)(node, struct, `Invalid ${type} component`);
+          return node;
+        };
+      }
+      exports.copyable = createBuilder(nodes_1.NodeType.Copyable, nodes_1.CopyableStruct, ['value']);
+      exports.divider = createBuilder(nodes_1.NodeType.Divider, nodes_1.DividerStruct);
+      exports.heading = createBuilder(nodes_1.NodeType.Heading, nodes_1.HeadingStruct, ['value']);
+      exports.panel = createBuilder(nodes_1.NodeType.Panel, nodes_1.PanelStruct, ['children']);
+      exports.spinner = createBuilder(nodes_1.NodeType.Spinner, nodes_1.SpinnerStruct);
+      exports.text = createBuilder(nodes_1.NodeType.Text, nodes_1.TextStruct, ['value']);
+    }, {
+      "./nodes": 7,
+      "@metamask/utils": 16
+    }],
+    6: [function (require, module, exports) {
+      "use strict";
+
+      var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = {
+            enumerable: true,
+            get: function () {
+              return m[k];
+            }
+          };
+        }
+        Object.defineProperty(o, k2, desc);
+      } : function (o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+      });
+      var __exportStar = this && this.__exportStar || function (m, exports) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+      };
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      __exportStar(require("./builder"), exports);
+      __exportStar(require("./nodes"), exports);
+      __exportStar(require("./validation"), exports);
+    }, {
+      "./builder": 5,
+      "./nodes": 7,
+      "./validation": 8
+    }],
+    7: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.ComponentStruct = exports.TextStruct = exports.SpinnerStruct = exports.PanelStruct = exports.HeadingStruct = exports.DividerStruct = exports.CopyableStruct = exports.NodeType = void 0;
+      const superstruct_1 = require("superstruct");
+      const NodeStruct = (0, superstruct_1.object)({
+        type: (0, superstruct_1.string)()
+      });
+      const ParentStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
+        children: (0, superstruct_1.array)((0, superstruct_1.lazy)(() => exports.ComponentStruct))
+      }));
+      const LiteralStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
+        value: (0, superstruct_1.unknown)()
+      }));
+      var NodeType;
+      (function (NodeType) {
+        NodeType["Copyable"] = "copyable";
+        NodeType["Divider"] = "divider";
+        NodeType["Heading"] = "heading";
+        NodeType["Panel"] = "panel";
+        NodeType["Spinner"] = "spinner";
+        NodeType["Text"] = "text";
+      })(NodeType = exports.NodeType || (exports.NodeType = {}));
+      exports.CopyableStruct = (0, superstruct_1.assign)(LiteralStruct, (0, superstruct_1.object)({
+        type: (0, superstruct_1.literal)(NodeType.Copyable),
+        value: (0, superstruct_1.string)()
+      }));
+      exports.DividerStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
+        type: (0, superstruct_1.literal)(NodeType.Divider)
+      }));
+      exports.HeadingStruct = (0, superstruct_1.assign)(LiteralStruct, (0, superstruct_1.object)({
+        type: (0, superstruct_1.literal)(NodeType.Heading),
+        value: (0, superstruct_1.string)()
+      }));
+      exports.PanelStruct = (0, superstruct_1.assign)(ParentStruct, (0, superstruct_1.object)({
+        type: (0, superstruct_1.literal)(NodeType.Panel)
+      }));
+      exports.SpinnerStruct = (0, superstruct_1.assign)(NodeStruct, (0, superstruct_1.object)({
+        type: (0, superstruct_1.literal)(NodeType.Spinner)
+      }));
+      exports.TextStruct = (0, superstruct_1.assign)(LiteralStruct, (0, superstruct_1.object)({
+        type: (0, superstruct_1.literal)(NodeType.Text),
+        value: (0, superstruct_1.string)()
+      }));
+      exports.ComponentStruct = (0, superstruct_1.union)([exports.CopyableStruct, exports.DividerStruct, exports.HeadingStruct, exports.PanelStruct, exports.SpinnerStruct, exports.TextStruct]);
+    }, {
+      "superstruct": 73
+    }],
+    8: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.assertIsComponent = exports.isComponent = void 0;
+      const utils_1 = require("@metamask/utils");
+      const superstruct_1 = require("superstruct");
+      const nodes_1 = require("./nodes");
+      function isComponent(value) {
+        return (0, superstruct_1.is)(value, nodes_1.ComponentStruct);
+      }
+      exports.isComponent = isComponent;
+      function assertIsComponent(value) {
+        (0, utils_1.assertStruct)(value, nodes_1.ComponentStruct, 'Invalid component');
+      }
+      exports.assertIsComponent = assertIsComponent;
+    }, {
+      "./nodes": 7,
+      "@metamask/utils": 16,
+      "superstruct": 73
+    }],
+    9: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.assertExhaustive = exports.assertStruct = exports.assert = exports.AssertionError = void 0;
+      const superstruct_1 = require("superstruct");
+      function isErrorWithMessage(error) {
+        return typeof error === 'object' && error !== null && 'message' in error;
+      }
+      function isConstructable(fn) {
+        var _a, _b;
+        return Boolean(typeof ((_b = (_a = fn === null || fn === void 0 ? void 0 : fn.prototype) === null || _a === void 0 ? void 0 : _a.constructor) === null || _b === void 0 ? void 0 : _b.name) === 'string');
+      }
+      function getErrorMessage(error) {
+        const message = isErrorWithMessage(error) ? error.message : String(error);
+        if (message.endsWith('.')) {
+          return message.slice(0, -1);
+        }
+        return message;
+      }
+      function getError(ErrorWrapper, message) {
+        if (isConstructable(ErrorWrapper)) {
+          return new ErrorWrapper({
+            message
+          });
+        }
+        return ErrorWrapper({
+          message
+        });
+      }
+      class AssertionError extends Error {
+        constructor(options) {
+          super(options.message);
+          this.code = 'ERR_ASSERTION';
+        }
+      }
+      exports.AssertionError = AssertionError;
+      function assert(value, message = 'Assertion failed.', ErrorWrapper = AssertionError) {
+        if (!value) {
+          if (message instanceof Error) {
+            throw message;
+          }
+          throw getError(ErrorWrapper, message);
+        }
+      }
+      exports.assert = assert;
+      function assertStruct(value, struct, errorPrefix = 'Assertion failed', ErrorWrapper = AssertionError) {
+        try {
+          (0, superstruct_1.assert)(value, struct);
+        } catch (error) {
+          throw getError(ErrorWrapper, `${errorPrefix}: ${getErrorMessage(error)}.`);
+        }
+      }
+      exports.assertStruct = assertStruct;
+      function assertExhaustive(_object) {
+        throw new Error('Invalid branch reached. Should be detected during compilation.');
+      }
+      exports.assertExhaustive = assertExhaustive;
+    }, {
+      "superstruct": 24
+    }],
+    10: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.base64 = void 0;
+      const superstruct_1 = require("superstruct");
+      const assert_1 = require("./assert");
+      const base64 = (struct, options = {}) => {
+        var _a, _b;
+        const paddingRequired = (_a = options.paddingRequired) !== null && _a !== void 0 ? _a : false;
+        const characterSet = (_b = options.characterSet) !== null && _b !== void 0 ? _b : 'base64';
+        let letters;
+        if (characterSet === 'base64') {
+          letters = String.raw`[A-Za-z0-9+\/]`;
+        } else {
+          (0, assert_1.assert)(characterSet === 'base64url');
+          letters = String.raw`[-_A-Za-z0-9]`;
+        }
+        let re;
+        if (paddingRequired) {
+          re = new RegExp(`^(?:${letters}{4})*(?:${letters}{3}=|${letters}{2}==)?$`, 'u');
+        } else {
+          re = new RegExp(`^(?:${letters}{4})*(?:${letters}{2,3}|${letters}{3}=|${letters}{2}==)?$`, 'u');
+        }
+        return (0, superstruct_1.pattern)(struct, re);
+      };
+      exports.base64 = base64;
+    }, {
+      "./assert": 9,
+      "superstruct": 24
+    }],
+    11: [function (require, module, exports) {
+      (function () {
+        (function () {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+          exports.createDataView = exports.concatBytes = exports.valueToBytes = exports.stringToBytes = exports.numberToBytes = exports.signedBigIntToBytes = exports.bigIntToBytes = exports.hexToBytes = exports.bytesToString = exports.bytesToNumber = exports.bytesToSignedBigInt = exports.bytesToBigInt = exports.bytesToHex = exports.assertIsBytes = exports.isBytes = void 0;
+          const assert_1 = require("./assert");
+          const hex_1 = require("./hex");
+          const HEX_MINIMUM_NUMBER_CHARACTER = 48;
+          const HEX_MAXIMUM_NUMBER_CHARACTER = 58;
+          const HEX_CHARACTER_OFFSET = 87;
+          function getPrecomputedHexValuesBuilder() {
+            const lookupTable = [];
+            return () => {
+              if (lookupTable.length === 0) {
+                for (let i = 0; i < 256; i++) {
+                  lookupTable.push(i.toString(16).padStart(2, '0'));
+                }
+              }
+              return lookupTable;
+            };
+          }
+          const getPrecomputedHexValues = getPrecomputedHexValuesBuilder();
+          function isBytes(value) {
+            return value instanceof Uint8Array;
+          }
+          exports.isBytes = isBytes;
+          function assertIsBytes(value) {
+            (0, assert_1.assert)(isBytes(value), 'Value must be a Uint8Array.');
+          }
+          exports.assertIsBytes = assertIsBytes;
+          function bytesToHex(bytes) {
+            assertIsBytes(bytes);
+            if (bytes.length === 0) {
+              return '0x';
+            }
+            const lookupTable = getPrecomputedHexValues();
+            const hexadecimal = new Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) {
+              hexadecimal[i] = lookupTable[bytes[i]];
+            }
+            return (0, hex_1.add0x)(hexadecimal.join(''));
+          }
+          exports.bytesToHex = bytesToHex;
+          function bytesToBigInt(bytes) {
+            assertIsBytes(bytes);
+            const hexadecimal = bytesToHex(bytes);
+            return BigInt(hexadecimal);
+          }
+          exports.bytesToBigInt = bytesToBigInt;
+          function bytesToSignedBigInt(bytes) {
+            assertIsBytes(bytes);
+            let value = BigInt(0);
+            for (const byte of bytes) {
+              value = (value << BigInt(8)) + BigInt(byte);
+            }
+            return BigInt.asIntN(bytes.length * 8, value);
+          }
+          exports.bytesToSignedBigInt = bytesToSignedBigInt;
+          function bytesToNumber(bytes) {
+            assertIsBytes(bytes);
+            const bigint = bytesToBigInt(bytes);
+            (0, assert_1.assert)(bigint <= BigInt(Number.MAX_SAFE_INTEGER), 'Number is not a safe integer. Use `bytesToBigInt` instead.');
+            return Number(bigint);
+          }
+          exports.bytesToNumber = bytesToNumber;
+          function bytesToString(bytes) {
+            assertIsBytes(bytes);
+            return new TextDecoder().decode(bytes);
+          }
+          exports.bytesToString = bytesToString;
+          function hexToBytes(value) {
+            var _a;
+            if (((_a = value === null || value === void 0 ? void 0 : value.toLowerCase) === null || _a === void 0 ? void 0 : _a.call(value)) === '0x') {
+              return new Uint8Array();
+            }
+            (0, hex_1.assertIsHexString)(value);
+            const strippedValue = (0, hex_1.remove0x)(value).toLowerCase();
+            const normalizedValue = strippedValue.length % 2 === 0 ? strippedValue : `0${strippedValue}`;
+            const bytes = new Uint8Array(normalizedValue.length / 2);
+            for (let i = 0; i < bytes.length; i++) {
+              const c1 = normalizedValue.charCodeAt(i * 2);
+              const c2 = normalizedValue.charCodeAt(i * 2 + 1);
+              const n1 = c1 - (c1 < HEX_MAXIMUM_NUMBER_CHARACTER ? HEX_MINIMUM_NUMBER_CHARACTER : HEX_CHARACTER_OFFSET);
+              const n2 = c2 - (c2 < HEX_MAXIMUM_NUMBER_CHARACTER ? HEX_MINIMUM_NUMBER_CHARACTER : HEX_CHARACTER_OFFSET);
+              bytes[i] = n1 * 16 + n2;
+            }
+            return bytes;
+          }
+          exports.hexToBytes = hexToBytes;
+          function bigIntToBytes(value) {
+            (0, assert_1.assert)(typeof value === 'bigint', 'Value must be a bigint.');
+            (0, assert_1.assert)(value >= BigInt(0), 'Value must be a non-negative bigint.');
+            const hexadecimal = value.toString(16);
+            return hexToBytes(hexadecimal);
+          }
+          exports.bigIntToBytes = bigIntToBytes;
+          function bigIntFits(value, bytes) {
+            (0, assert_1.assert)(bytes > 0);
+            const mask = value >> BigInt(31);
+            return !((~value & mask) + (value & ~mask) >> BigInt(bytes * 8 + ~0));
+          }
+          function signedBigIntToBytes(value, byteLength) {
+            (0, assert_1.assert)(typeof value === 'bigint', 'Value must be a bigint.');
+            (0, assert_1.assert)(typeof byteLength === 'number', 'Byte length must be a number.');
+            (0, assert_1.assert)(byteLength > 0, 'Byte length must be greater than 0.');
+            (0, assert_1.assert)(bigIntFits(value, byteLength), 'Byte length is too small to represent the given value.');
+            let numberValue = value;
+            const bytes = new Uint8Array(byteLength);
+            for (let i = 0; i < bytes.length; i++) {
+              bytes[i] = Number(BigInt.asUintN(8, numberValue));
+              numberValue >>= BigInt(8);
+            }
+            return bytes.reverse();
+          }
+          exports.signedBigIntToBytes = signedBigIntToBytes;
+          function numberToBytes(value) {
+            (0, assert_1.assert)(typeof value === 'number', 'Value must be a number.');
+            (0, assert_1.assert)(value >= 0, 'Value must be a non-negative number.');
+            (0, assert_1.assert)(Number.isSafeInteger(value), 'Value is not a safe integer. Use `bigIntToBytes` instead.');
+            const hexadecimal = value.toString(16);
+            return hexToBytes(hexadecimal);
+          }
+          exports.numberToBytes = numberToBytes;
+          function stringToBytes(value) {
+            (0, assert_1.assert)(typeof value === 'string', 'Value must be a string.');
+            return new TextEncoder().encode(value);
+          }
+          exports.stringToBytes = stringToBytes;
+          function valueToBytes(value) {
+            if (typeof value === 'bigint') {
+              return bigIntToBytes(value);
+            }
+            if (typeof value === 'number') {
+              return numberToBytes(value);
+            }
+            if (typeof value === 'string') {
+              if (value.startsWith('0x')) {
+                return hexToBytes(value);
+              }
+              return stringToBytes(value);
+            }
+            if (isBytes(value)) {
+              return value;
+            }
+            throw new TypeError(`Unsupported value type: "${typeof value}".`);
+          }
+          exports.valueToBytes = valueToBytes;
+          function concatBytes(values) {
+            const normalizedValues = new Array(values.length);
+            let byteLength = 0;
+            for (let i = 0; i < values.length; i++) {
+              const value = valueToBytes(values[i]);
+              normalizedValues[i] = value;
+              byteLength += value.length;
+            }
+            const bytes = new Uint8Array(byteLength);
+            for (let i = 0, offset = 0; i < normalizedValues.length; i++) {
+              bytes.set(normalizedValues[i], offset);
+              offset += normalizedValues[i].length;
+            }
+            return bytes;
+          }
+          exports.concatBytes = concatBytes;
+          function createDataView(bytes) {
+            if (typeof Buffer !== 'undefined' && bytes instanceof Buffer) {
+              const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+              return new DataView(buffer);
+            }
+            return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+          }
+          exports.createDataView = createDataView;
+        }).call(this);
+      }).call(this, require("buffer").Buffer);
+    }, {
+      "./assert": 9,
+      "./hex": 15,
+      "buffer": 2
+    }],
+    12: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.ChecksumStruct = void 0;
+      const superstruct_1 = require("superstruct");
+      const base64_1 = require("./base64");
+      exports.ChecksumStruct = (0, superstruct_1.size)((0, base64_1.base64)((0, superstruct_1.string)(), {
+        paddingRequired: true
+      }), 44, 44);
+    }, {
+      "./base64": 10,
+      "superstruct": 24
+    }],
+    13: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.createHex = exports.createBytes = exports.createBigInt = exports.createNumber = void 0;
+      const superstruct_1 = require("superstruct");
+      const assert_1 = require("./assert");
+      const bytes_1 = require("./bytes");
+      const hex_1 = require("./hex");
+      const NumberLikeStruct = (0, superstruct_1.union)([(0, superstruct_1.number)(), (0, superstruct_1.bigint)(), (0, superstruct_1.string)(), hex_1.StrictHexStruct]);
+      const NumberCoercer = (0, superstruct_1.coerce)((0, superstruct_1.number)(), NumberLikeStruct, Number);
+      const BigIntCoercer = (0, superstruct_1.coerce)((0, superstruct_1.bigint)(), NumberLikeStruct, BigInt);
+      const BytesLikeStruct = (0, superstruct_1.union)([hex_1.StrictHexStruct, (0, superstruct_1.instance)(Uint8Array)]);
+      const BytesCoercer = (0, superstruct_1.coerce)((0, superstruct_1.instance)(Uint8Array), (0, superstruct_1.union)([hex_1.StrictHexStruct]), bytes_1.hexToBytes);
+      const HexCoercer = (0, superstruct_1.coerce)(hex_1.StrictHexStruct, (0, superstruct_1.instance)(Uint8Array), bytes_1.bytesToHex);
+      function createNumber(value) {
+        try {
+          const result = (0, superstruct_1.create)(value, NumberCoercer);
+          (0, assert_1.assert)(Number.isFinite(result), `Expected a number-like value, got "${value}".`);
+          return result;
+        } catch (error) {
+          if (error instanceof superstruct_1.StructError) {
+            throw new Error(`Expected a number-like value, got "${value}".`);
+          }
+          throw error;
+        }
+      }
+      exports.createNumber = createNumber;
+      function createBigInt(value) {
+        try {
+          return (0, superstruct_1.create)(value, BigIntCoercer);
+        } catch (error) {
+          if (error instanceof superstruct_1.StructError) {
+            throw new Error(`Expected a number-like value, got "${String(error.value)}".`);
+          }
+          throw error;
+        }
+      }
+      exports.createBigInt = createBigInt;
+      function createBytes(value) {
+        if (typeof value === 'string' && value.toLowerCase() === '0x') {
+          return new Uint8Array();
+        }
+        try {
+          return (0, superstruct_1.create)(value, BytesCoercer);
+        } catch (error) {
+          if (error instanceof superstruct_1.StructError) {
+            throw new Error(`Expected a bytes-like value, got "${String(error.value)}".`);
+          }
+          throw error;
+        }
+      }
+      exports.createBytes = createBytes;
+      function createHex(value) {
+        if (value instanceof Uint8Array && value.length === 0 || typeof value === 'string' && value.toLowerCase() === '0x') {
+          return '0x';
+        }
+        try {
+          return (0, superstruct_1.create)(value, HexCoercer);
+        } catch (error) {
+          if (error instanceof superstruct_1.StructError) {
+            throw new Error(`Expected a bytes-like value, got "${String(error.value)}".`);
+          }
+          throw error;
+        }
+      }
+      exports.createHex = createHex;
+    }, {
+      "./assert": 9,
+      "./bytes": 11,
+      "./hex": 15,
+      "superstruct": 24
+    }],
+    14: [function (require, module, exports) {
+      "use strict";
+
+      var __classPrivateFieldSet = this && this.__classPrivateFieldSet || function (receiver, state, value, kind, f) {
+        if (kind === "m") throw new TypeError("Private method is not writable");
+        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+      };
+      var __classPrivateFieldGet = this && this.__classPrivateFieldGet || function (receiver, state, kind, f) {
+        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+      };
+      var _FrozenMap_map, _FrozenSet_set;
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.FrozenSet = exports.FrozenMap = void 0;
+      class FrozenMap {
+        constructor(entries) {
+          _FrozenMap_map.set(this, void 0);
+          __classPrivateFieldSet(this, _FrozenMap_map, new Map(entries), "f");
+          Object.freeze(this);
+        }
+        get size() {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").size;
+        }
+        [(_FrozenMap_map = new WeakMap(), Symbol.iterator)]() {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f")[Symbol.iterator]();
+        }
+        entries() {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").entries();
+        }
+        forEach(callbackfn, thisArg) {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").forEach((value, key, _map) => callbackfn.call(thisArg, value, key, this));
+        }
+        get(key) {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").get(key);
+        }
+        has(key) {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").has(key);
+        }
+        keys() {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").keys();
+        }
+        values() {
+          return __classPrivateFieldGet(this, _FrozenMap_map, "f").values();
+        }
+        toString() {
+          return `FrozenMap(${this.size}) {${this.size > 0 ? ` ${[...this.entries()].map(([key, value]) => `${String(key)} => ${String(value)}`).join(', ')} ` : ''}}`;
+        }
+      }
+      exports.FrozenMap = FrozenMap;
+      class FrozenSet {
+        constructor(values) {
+          _FrozenSet_set.set(this, void 0);
+          __classPrivateFieldSet(this, _FrozenSet_set, new Set(values), "f");
+          Object.freeze(this);
+        }
+        get size() {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f").size;
+        }
+        [(_FrozenSet_set = new WeakMap(), Symbol.iterator)]() {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f")[Symbol.iterator]();
+        }
+        entries() {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f").entries();
+        }
+        forEach(callbackfn, thisArg) {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f").forEach((value, value2, _set) => callbackfn.call(thisArg, value, value2, this));
+        }
+        has(value) {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f").has(value);
+        }
+        keys() {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f").keys();
+        }
+        values() {
+          return __classPrivateFieldGet(this, _FrozenSet_set, "f").values();
+        }
+        toString() {
+          return `FrozenSet(${this.size}) {${this.size > 0 ? ` ${[...this.values()].map(member => String(member)).join(', ')} ` : ''}}`;
+        }
+      }
+      exports.FrozenSet = FrozenSet;
+      Object.freeze(FrozenMap);
+      Object.freeze(FrozenMap.prototype);
+      Object.freeze(FrozenSet);
+      Object.freeze(FrozenSet.prototype);
+    }, {}],
+    15: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.remove0x = exports.add0x = exports.assertIsStrictHexString = exports.assertIsHexString = exports.isStrictHexString = exports.isHexString = exports.StrictHexStruct = exports.HexStruct = void 0;
+      const superstruct_1 = require("superstruct");
+      const assert_1 = require("./assert");
+      exports.HexStruct = (0, superstruct_1.pattern)((0, superstruct_1.string)(), /^(?:0x)?[0-9a-f]+$/iu);
+      exports.StrictHexStruct = (0, superstruct_1.pattern)((0, superstruct_1.string)(), /^0x[0-9a-f]+$/iu);
+      function isHexString(value) {
+        return (0, superstruct_1.is)(value, exports.HexStruct);
+      }
+      exports.isHexString = isHexString;
+      function isStrictHexString(value) {
+        return (0, superstruct_1.is)(value, exports.StrictHexStruct);
+      }
+      exports.isStrictHexString = isStrictHexString;
+      function assertIsHexString(value) {
+        (0, assert_1.assert)(isHexString(value), 'Value must be a hexadecimal string.');
+      }
+      exports.assertIsHexString = assertIsHexString;
+      function assertIsStrictHexString(value) {
+        (0, assert_1.assert)(isStrictHexString(value), 'Value must be a hexadecimal string, starting with "0x".');
+      }
+      exports.assertIsStrictHexString = assertIsStrictHexString;
+      function add0x(hexadecimal) {
+        if (hexadecimal.startsWith('0x')) {
+          return hexadecimal;
+        }
+        if (hexadecimal.startsWith('0X')) {
+          return `0x${hexadecimal.substring(2)}`;
+        }
+        return `0x${hexadecimal}`;
+      }
+      exports.add0x = add0x;
+      function remove0x(hexadecimal) {
+        if (hexadecimal.startsWith('0x') || hexadecimal.startsWith('0X')) {
+          return hexadecimal.substring(2);
+        }
+        return hexadecimal;
+      }
+      exports.remove0x = remove0x;
+    }, {
+      "./assert": 9,
+      "superstruct": 24
+    }],
+    16: [function (require, module, exports) {
+      "use strict";
+
+      var __createBinding = this && this.__createBinding || (Object.create ? function (o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = {
+            enumerable: true,
+            get: function () {
+              return m[k];
+            }
+          };
+        }
+        Object.defineProperty(o, k2, desc);
+      } : function (o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+      });
+      var __exportStar = this && this.__exportStar || function (m, exports) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+      };
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      __exportStar(require("./assert"), exports);
+      __exportStar(require("./base64"), exports);
+      __exportStar(require("./bytes"), exports);
+      __exportStar(require("./checksum"), exports);
+      __exportStar(require("./coercers"), exports);
+      __exportStar(require("./collections"), exports);
+      __exportStar(require("./hex"), exports);
+      __exportStar(require("./json"), exports);
+      __exportStar(require("./logging"), exports);
+      __exportStar(require("./misc"), exports);
+      __exportStar(require("./number"), exports);
+      __exportStar(require("./opaque"), exports);
+      __exportStar(require("./time"), exports);
+      __exportStar(require("./versions"), exports);
+    }, {
+      "./assert": 9,
+      "./base64": 10,
+      "./bytes": 11,
+      "./checksum": 12,
+      "./coercers": 13,
+      "./collections": 14,
+      "./hex": 15,
+      "./json": 17,
+      "./logging": 18,
+      "./misc": 19,
+      "./number": 20,
+      "./opaque": 21,
+      "./time": 22,
+      "./versions": 23
+    }],
+    17: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.validateJsonAndGetSize = exports.getJsonRpcIdValidator = exports.assertIsJsonRpcError = exports.isJsonRpcError = exports.assertIsJsonRpcFailure = exports.isJsonRpcFailure = exports.assertIsJsonRpcSuccess = exports.isJsonRpcSuccess = exports.assertIsJsonRpcResponse = exports.isJsonRpcResponse = exports.assertIsPendingJsonRpcResponse = exports.isPendingJsonRpcResponse = exports.JsonRpcResponseStruct = exports.JsonRpcFailureStruct = exports.JsonRpcSuccessStruct = exports.PendingJsonRpcResponseStruct = exports.assertIsJsonRpcRequest = exports.isJsonRpcRequest = exports.assertIsJsonRpcNotification = exports.isJsonRpcNotification = exports.JsonRpcNotificationStruct = exports.JsonRpcRequestStruct = exports.JsonRpcParamsStruct = exports.JsonRpcErrorStruct = exports.JsonRpcIdStruct = exports.JsonRpcVersionStruct = exports.jsonrpc2 = exports.isValidJson = exports.JsonStruct = void 0;
+      const superstruct_1 = require("superstruct");
+      const assert_1 = require("./assert");
+      const misc_1 = require("./misc");
+      exports.JsonStruct = (0, superstruct_1.define)('Json', value => {
+        const [isValid] = validateJsonAndGetSize(value, true);
+        if (!isValid) {
+          return 'Expected a valid JSON-serializable value';
+        }
+        return true;
+      });
+      function isValidJson(value) {
+        return (0, superstruct_1.is)(value, exports.JsonStruct);
+      }
+      exports.isValidJson = isValidJson;
+      exports.jsonrpc2 = '2.0';
+      exports.JsonRpcVersionStruct = (0, superstruct_1.literal)(exports.jsonrpc2);
+      exports.JsonRpcIdStruct = (0, superstruct_1.nullable)((0, superstruct_1.union)([(0, superstruct_1.number)(), (0, superstruct_1.string)()]));
+      exports.JsonRpcErrorStruct = (0, superstruct_1.object)({
+        code: (0, superstruct_1.integer)(),
+        message: (0, superstruct_1.string)(),
+        data: (0, superstruct_1.optional)(exports.JsonStruct),
+        stack: (0, superstruct_1.optional)((0, superstruct_1.string)())
+      });
+      exports.JsonRpcParamsStruct = (0, superstruct_1.optional)((0, superstruct_1.union)([(0, superstruct_1.record)((0, superstruct_1.string)(), exports.JsonStruct), (0, superstruct_1.array)(exports.JsonStruct)]));
+      exports.JsonRpcRequestStruct = (0, superstruct_1.object)({
+        id: exports.JsonRpcIdStruct,
+        jsonrpc: exports.JsonRpcVersionStruct,
+        method: (0, superstruct_1.string)(),
+        params: exports.JsonRpcParamsStruct
+      });
+      exports.JsonRpcNotificationStruct = (0, superstruct_1.omit)(exports.JsonRpcRequestStruct, ['id']);
+      function isJsonRpcNotification(value) {
+        return (0, superstruct_1.is)(value, exports.JsonRpcNotificationStruct);
+      }
+      exports.isJsonRpcNotification = isJsonRpcNotification;
+      function assertIsJsonRpcNotification(value, ErrorWrapper) {
+        (0, assert_1.assertStruct)(value, exports.JsonRpcNotificationStruct, 'Invalid JSON-RPC notification', ErrorWrapper);
+      }
+      exports.assertIsJsonRpcNotification = assertIsJsonRpcNotification;
+      function isJsonRpcRequest(value) {
+        return (0, superstruct_1.is)(value, exports.JsonRpcRequestStruct);
+      }
+      exports.isJsonRpcRequest = isJsonRpcRequest;
+      function assertIsJsonRpcRequest(value, ErrorWrapper) {
+        (0, assert_1.assertStruct)(value, exports.JsonRpcRequestStruct, 'Invalid JSON-RPC request', ErrorWrapper);
+      }
+      exports.assertIsJsonRpcRequest = assertIsJsonRpcRequest;
+      exports.PendingJsonRpcResponseStruct = (0, superstruct_1.object)({
+        id: exports.JsonRpcIdStruct,
+        jsonrpc: exports.JsonRpcVersionStruct,
+        result: (0, superstruct_1.optional)((0, superstruct_1.unknown)()),
+        error: (0, superstruct_1.optional)(exports.JsonRpcErrorStruct)
+      });
+      exports.JsonRpcSuccessStruct = (0, superstruct_1.object)({
+        id: exports.JsonRpcIdStruct,
+        jsonrpc: exports.JsonRpcVersionStruct,
+        result: exports.JsonStruct
+      });
+      exports.JsonRpcFailureStruct = (0, superstruct_1.object)({
+        id: exports.JsonRpcIdStruct,
+        jsonrpc: exports.JsonRpcVersionStruct,
+        error: exports.JsonRpcErrorStruct
+      });
+      exports.JsonRpcResponseStruct = (0, superstruct_1.union)([exports.JsonRpcSuccessStruct, exports.JsonRpcFailureStruct]);
+      function isPendingJsonRpcResponse(response) {
+        return (0, superstruct_1.is)(response, exports.PendingJsonRpcResponseStruct);
+      }
+      exports.isPendingJsonRpcResponse = isPendingJsonRpcResponse;
+      function assertIsPendingJsonRpcResponse(response, ErrorWrapper) {
+        (0, assert_1.assertStruct)(response, exports.PendingJsonRpcResponseStruct, 'Invalid pending JSON-RPC response', ErrorWrapper);
+      }
+      exports.assertIsPendingJsonRpcResponse = assertIsPendingJsonRpcResponse;
+      function isJsonRpcResponse(response) {
+        return (0, superstruct_1.is)(response, exports.JsonRpcResponseStruct);
+      }
+      exports.isJsonRpcResponse = isJsonRpcResponse;
+      function assertIsJsonRpcResponse(value, ErrorWrapper) {
+        (0, assert_1.assertStruct)(value, exports.JsonRpcResponseStruct, 'Invalid JSON-RPC response', ErrorWrapper);
+      }
+      exports.assertIsJsonRpcResponse = assertIsJsonRpcResponse;
+      function isJsonRpcSuccess(value) {
+        return (0, superstruct_1.is)(value, exports.JsonRpcSuccessStruct);
+      }
+      exports.isJsonRpcSuccess = isJsonRpcSuccess;
+      function assertIsJsonRpcSuccess(value, ErrorWrapper) {
+        (0, assert_1.assertStruct)(value, exports.JsonRpcSuccessStruct, 'Invalid JSON-RPC success response', ErrorWrapper);
+      }
+      exports.assertIsJsonRpcSuccess = assertIsJsonRpcSuccess;
+      function isJsonRpcFailure(value) {
+        return (0, superstruct_1.is)(value, exports.JsonRpcFailureStruct);
+      }
+      exports.isJsonRpcFailure = isJsonRpcFailure;
+      function assertIsJsonRpcFailure(value, ErrorWrapper) {
+        (0, assert_1.assertStruct)(value, exports.JsonRpcFailureStruct, 'Invalid JSON-RPC failure response', ErrorWrapper);
+      }
+      exports.assertIsJsonRpcFailure = assertIsJsonRpcFailure;
+      function isJsonRpcError(value) {
+        return (0, superstruct_1.is)(value, exports.JsonRpcErrorStruct);
+      }
+      exports.isJsonRpcError = isJsonRpcError;
+      function assertIsJsonRpcError(value, ErrorWrapper) {
+        (0, assert_1.assertStruct)(value, exports.JsonRpcErrorStruct, 'Invalid JSON-RPC error', ErrorWrapper);
+      }
+      exports.assertIsJsonRpcError = assertIsJsonRpcError;
+      function getJsonRpcIdValidator(options) {
+        const {
+          permitEmptyString,
+          permitFractions,
+          permitNull
+        } = Object.assign({
+          permitEmptyString: true,
+          permitFractions: false,
+          permitNull: true
+        }, options);
+        const isValidJsonRpcId = id => {
+          return Boolean(typeof id === 'number' && (permitFractions || Number.isInteger(id)) || typeof id === 'string' && (permitEmptyString || id.length > 0) || permitNull && id === null);
+        };
+        return isValidJsonRpcId;
+      }
+      exports.getJsonRpcIdValidator = getJsonRpcIdValidator;
+      function validateJsonAndGetSize(jsObject, skipSizingProcess = false) {
+        const seenObjects = new Set();
+        function getJsonSerializableInfo(value, skipSizing) {
+          if (value === undefined) {
+            return [false, 0];
+          } else if (value === null) {
+            return [true, skipSizing ? 0 : misc_1.JsonSize.Null];
+          }
+          const typeOfValue = typeof value;
+          try {
+            if (typeOfValue === 'function') {
+              return [false, 0];
+            } else if (typeOfValue === 'string' || value instanceof String) {
+              return [true, skipSizing ? 0 : (0, misc_1.calculateStringSize)(value) + misc_1.JsonSize.Quote * 2];
+            } else if (typeOfValue === 'boolean' || value instanceof Boolean) {
+              if (skipSizing) {
+                return [true, 0];
+              }
+              return [true, value == true ? misc_1.JsonSize.True : misc_1.JsonSize.False];
+            } else if (typeOfValue === 'number' || value instanceof Number) {
+              if (skipSizing) {
+                return [true, 0];
+              }
+              return [true, (0, misc_1.calculateNumberSize)(value)];
+            } else if (value instanceof Date) {
+              if (skipSizing) {
+                return [true, 0];
+              }
+              return [true, isNaN(value.getDate()) ? misc_1.JsonSize.Null : misc_1.JsonSize.Date + misc_1.JsonSize.Quote * 2];
+            }
+          } catch (_) {
+            return [false, 0];
+          }
+          if (!(0, misc_1.isPlainObject)(value) && !Array.isArray(value)) {
+            return [false, 0];
+          }
+          if (seenObjects.has(value)) {
+            return [false, 0];
+          }
+          seenObjects.add(value);
+          try {
+            return [true, Object.entries(value).reduce((sum, [key, nestedValue], idx, arr) => {
+              let [valid, size] = getJsonSerializableInfo(nestedValue, skipSizing);
+              if (!valid) {
+                throw new Error('JSON validation did not pass. Validation process stopped.');
+              }
+              seenObjects.delete(value);
+              if (skipSizing) {
+                return 0;
+              }
+              const keySize = Array.isArray(value) ? 0 : key.length + misc_1.JsonSize.Comma + misc_1.JsonSize.Colon * 2;
+              const separator = idx < arr.length - 1 ? misc_1.JsonSize.Comma : 0;
+              return sum + keySize + size + separator;
+            }, skipSizing ? 0 : misc_1.JsonSize.Wrapper * 2)];
+          } catch (_) {
+            return [false, 0];
+          }
+        }
+        return getJsonSerializableInfo(jsObject, skipSizingProcess);
+      }
+      exports.validateJsonAndGetSize = validateJsonAndGetSize;
+    }, {
+      "./assert": 9,
+      "./misc": 19,
+      "superstruct": 24
+    }],
+    18: [function (require, module, exports) {
+      "use strict";
+
+      var __importDefault = this && this.__importDefault || function (mod) {
+        return mod && mod.__esModule ? mod : {
+          "default": mod
+        };
+      };
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.createModuleLogger = exports.createProjectLogger = void 0;
+      const debug_1 = __importDefault(require("debug"));
+      const globalLogger = (0, debug_1.default)('metamask');
+      function createProjectLogger(projectName) {
+        return globalLogger.extend(projectName);
+      }
+      exports.createProjectLogger = createProjectLogger;
+      function createModuleLogger(projectLogger, moduleName) {
+        return projectLogger.extend(moduleName);
+      }
+      exports.createModuleLogger = createModuleLogger;
+    }, {
+      "debug": 26
+    }],
+    19: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.calculateNumberSize = exports.calculateStringSize = exports.isASCII = exports.isPlainObject = exports.ESCAPE_CHARACTERS_REGEXP = exports.JsonSize = exports.hasProperty = exports.isObject = exports.isNullOrUndefined = exports.isNonEmptyArray = void 0;
+      function isNonEmptyArray(value) {
+        return Array.isArray(value) && value.length > 0;
+      }
+      exports.isNonEmptyArray = isNonEmptyArray;
+      function isNullOrUndefined(value) {
+        return value === null || value === undefined;
+      }
+      exports.isNullOrUndefined = isNullOrUndefined;
+      function isObject(value) {
+        return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+      }
+      exports.isObject = isObject;
+      const hasProperty = (objectToCheck, name) => Object.hasOwnProperty.call(objectToCheck, name);
+      exports.hasProperty = hasProperty;
+      var JsonSize;
+      (function (JsonSize) {
+        JsonSize[JsonSize["Null"] = 4] = "Null";
+        JsonSize[JsonSize["Comma"] = 1] = "Comma";
+        JsonSize[JsonSize["Wrapper"] = 1] = "Wrapper";
+        JsonSize[JsonSize["True"] = 4] = "True";
+        JsonSize[JsonSize["False"] = 5] = "False";
+        JsonSize[JsonSize["Quote"] = 1] = "Quote";
+        JsonSize[JsonSize["Colon"] = 1] = "Colon";
+        JsonSize[JsonSize["Date"] = 24] = "Date";
+      })(JsonSize = exports.JsonSize || (exports.JsonSize = {}));
+      exports.ESCAPE_CHARACTERS_REGEXP = /"|\\|\n|\r|\t/gu;
+      function isPlainObject(value) {
+        if (typeof value !== 'object' || value === null) {
+          return false;
+        }
+        try {
+          let proto = value;
+          while (Object.getPrototypeOf(proto) !== null) {
+            proto = Object.getPrototypeOf(proto);
+          }
+          return Object.getPrototypeOf(value) === proto;
+        } catch (_) {
+          return false;
+        }
+      }
+      exports.isPlainObject = isPlainObject;
+      function isASCII(character) {
+        return character.charCodeAt(0) <= 127;
+      }
+      exports.isASCII = isASCII;
+      function calculateStringSize(value) {
+        var _a;
+        const size = value.split('').reduce((total, character) => {
+          if (isASCII(character)) {
+            return total + 1;
+          }
+          return total + 2;
+        }, 0);
+        return size + ((_a = value.match(exports.ESCAPE_CHARACTERS_REGEXP)) !== null && _a !== void 0 ? _a : []).length;
+      }
+      exports.calculateStringSize = calculateStringSize;
+      function calculateNumberSize(value) {
+        return value.toString().length;
+      }
+      exports.calculateNumberSize = calculateNumberSize;
+    }, {}],
+    20: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.hexToBigInt = exports.hexToNumber = exports.bigIntToHex = exports.numberToHex = void 0;
+      const assert_1 = require("./assert");
+      const hex_1 = require("./hex");
+      const numberToHex = value => {
+        (0, assert_1.assert)(typeof value === 'number', 'Value must be a number.');
+        (0, assert_1.assert)(value >= 0, 'Value must be a non-negative number.');
+        (0, assert_1.assert)(Number.isSafeInteger(value), 'Value is not a safe integer. Use `bigIntToHex` instead.');
+        return (0, hex_1.add0x)(value.toString(16));
+      };
+      exports.numberToHex = numberToHex;
+      const bigIntToHex = value => {
+        (0, assert_1.assert)(typeof value === 'bigint', 'Value must be a bigint.');
+        (0, assert_1.assert)(value >= 0, 'Value must be a non-negative bigint.');
+        return (0, hex_1.add0x)(value.toString(16));
+      };
+      exports.bigIntToHex = bigIntToHex;
+      const hexToNumber = value => {
+        (0, hex_1.assertIsHexString)(value);
+        const numberValue = parseInt(value, 16);
+        (0, assert_1.assert)(Number.isSafeInteger(numberValue), 'Value is not a safe integer. Use `hexToBigInt` instead.');
+        return numberValue;
+      };
+      exports.hexToNumber = hexToNumber;
+      const hexToBigInt = value => {
+        (0, hex_1.assertIsHexString)(value);
+        return BigInt((0, hex_1.add0x)(value));
+      };
+      exports.hexToBigInt = hexToBigInt;
+    }, {
+      "./assert": 9,
+      "./hex": 15
+    }],
+    21: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+    }, {}],
+    22: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.timeSince = exports.inMilliseconds = exports.Duration = void 0;
+      var Duration;
+      (function (Duration) {
+        Duration[Duration["Millisecond"] = 1] = "Millisecond";
+        Duration[Duration["Second"] = 1000] = "Second";
+        Duration[Duration["Minute"] = 60000] = "Minute";
+        Duration[Duration["Hour"] = 3600000] = "Hour";
+        Duration[Duration["Day"] = 86400000] = "Day";
+        Duration[Duration["Week"] = 604800000] = "Week";
+        Duration[Duration["Year"] = 31536000000] = "Year";
+      })(Duration = exports.Duration || (exports.Duration = {}));
+      const isNonNegativeInteger = number => Number.isInteger(number) && number >= 0;
+      const assertIsNonNegativeInteger = (number, name) => {
+        if (!isNonNegativeInteger(number)) {
+          throw new Error(`"${name}" must be a non-negative integer. Received: "${number}".`);
+        }
+      };
+      function inMilliseconds(count, duration) {
+        assertIsNonNegativeInteger(count, 'count');
+        return count * duration;
+      }
+      exports.inMilliseconds = inMilliseconds;
+      function timeSince(timestamp) {
+        assertIsNonNegativeInteger(timestamp, 'timestamp');
+        return Date.now() - timestamp;
+      }
+      exports.timeSince = timeSince;
+    }, {}],
     23: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.satisfiesVersionRange = exports.gtRange = exports.gtVersion = exports.assertIsSemVerRange = exports.assertIsSemVerVersion = exports.isValidSemVerRange = exports.isValidSemVerVersion = exports.VersionRangeStruct = exports.VersionStruct = void 0;
+      const semver_1 = require("semver");
+      const superstruct_1 = require("superstruct");
+      const assert_1 = require("./assert");
+      exports.VersionStruct = (0, superstruct_1.refine)((0, superstruct_1.string)(), 'Version', value => {
+        if ((0, semver_1.valid)(value) === null) {
+          return `Expected SemVer version, got "${value}"`;
+        }
+        return true;
+      });
+      exports.VersionRangeStruct = (0, superstruct_1.refine)((0, superstruct_1.string)(), 'Version range', value => {
+        if ((0, semver_1.validRange)(value) === null) {
+          return `Expected SemVer range, got "${value}"`;
+        }
+        return true;
+      });
+      function isValidSemVerVersion(version) {
+        return (0, superstruct_1.is)(version, exports.VersionStruct);
+      }
+      exports.isValidSemVerVersion = isValidSemVerVersion;
+      function isValidSemVerRange(versionRange) {
+        return (0, superstruct_1.is)(versionRange, exports.VersionRangeStruct);
+      }
+      exports.isValidSemVerRange = isValidSemVerRange;
+      function assertIsSemVerVersion(version) {
+        (0, assert_1.assertStruct)(version, exports.VersionStruct);
+      }
+      exports.assertIsSemVerVersion = assertIsSemVerVersion;
+      function assertIsSemVerRange(range) {
+        (0, assert_1.assertStruct)(range, exports.VersionRangeStruct);
+      }
+      exports.assertIsSemVerRange = assertIsSemVerRange;
+      function gtVersion(version1, version2) {
+        return (0, semver_1.gt)(version1, version2);
+      }
+      exports.gtVersion = gtVersion;
+      function gtRange(version, range) {
+        return (0, semver_1.gtr)(version, range);
+      }
+      exports.gtRange = gtRange;
+      function satisfiesVersionRange(version, versionRange) {
+        return (0, semver_1.satisfies)(version, versionRange, {
+          includePrerelease: true
+        });
+      }
+      exports.satisfiesVersionRange = satisfiesVersionRange;
+    }, {
+      "./assert": 9,
+      "semver": 56,
+      "superstruct": 24
+    }],
+    24: [function (require, module, exports) {
+      (function (global, factory) {
+        typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Superstruct = {}));
+      })(this, function (exports) {
+        'use strict';
+
+        class StructError extends TypeError {
+          constructor(failure, failures) {
+            let cached;
+            const {
+              message,
+              explanation,
+              ...rest
+            } = failure;
+            const {
+              path
+            } = failure;
+            const msg = path.length === 0 ? message : `At path: ${path.join('.')} -- ${message}`;
+            super(explanation ?? msg);
+            if (explanation != null) this.cause = msg;
+            Object.assign(this, rest);
+            this.name = this.constructor.name;
+            this.failures = () => {
+              return cached ?? (cached = [failure, ...failures()]);
+            };
+          }
+        }
+        function isIterable(x) {
+          return isObject(x) && typeof x[Symbol.iterator] === 'function';
+        }
+        function isObject(x) {
+          return typeof x === 'object' && x != null;
+        }
+        function isPlainObject(x) {
+          if (Object.prototype.toString.call(x) !== '[object Object]') {
+            return false;
+          }
+          const prototype = Object.getPrototypeOf(x);
+          return prototype === null || prototype === Object.prototype;
+        }
+        function print(value) {
+          if (typeof value === 'symbol') {
+            return value.toString();
+          }
+          return typeof value === 'string' ? JSON.stringify(value) : `${value}`;
+        }
+        function shiftIterator(input) {
+          const {
+            done,
+            value
+          } = input.next();
+          return done ? undefined : value;
+        }
+        function toFailure(result, context, struct, value) {
+          if (result === true) {
+            return;
+          } else if (result === false) {
+            result = {};
+          } else if (typeof result === 'string') {
+            result = {
+              message: result
+            };
+          }
+          const {
+            path,
+            branch
+          } = context;
+          const {
+            type
+          } = struct;
+          const {
+            refinement,
+            message = `Expected a value of type \`${type}\`${refinement ? ` with refinement \`${refinement}\`` : ''}, but received: \`${print(value)}\``
+          } = result;
+          return {
+            value,
+            type,
+            refinement,
+            key: path[path.length - 1],
+            path,
+            branch,
+            ...result,
+            message
+          };
+        }
+        function* toFailures(result, context, struct, value) {
+          if (!isIterable(result)) {
+            result = [result];
+          }
+          for (const r of result) {
+            const failure = toFailure(r, context, struct, value);
+            if (failure) {
+              yield failure;
+            }
+          }
+        }
+        function* run(value, struct, options = {}) {
+          const {
+            path = [],
+            branch = [value],
+            coerce = false,
+            mask = false
+          } = options;
+          const ctx = {
+            path,
+            branch
+          };
+          if (coerce) {
+            value = struct.coercer(value, ctx);
+            if (mask && struct.type !== 'type' && isObject(struct.schema) && isObject(value) && !Array.isArray(value)) {
+              for (const key in value) {
+                if (struct.schema[key] === undefined) {
+                  delete value[key];
+                }
+              }
+            }
+          }
+          let status = 'valid';
+          for (const failure of struct.validator(value, ctx)) {
+            failure.explanation = options.message;
+            status = 'not_valid';
+            yield [failure, undefined];
+          }
+          for (let [k, v, s] of struct.entries(value, ctx)) {
+            const ts = run(v, s, {
+              path: k === undefined ? path : [...path, k],
+              branch: k === undefined ? branch : [...branch, v],
+              coerce,
+              mask,
+              message: options.message
+            });
+            for (const t of ts) {
+              if (t[0]) {
+                status = t[0].refinement != null ? 'not_refined' : 'not_valid';
+                yield [t[0], undefined];
+              } else if (coerce) {
+                v = t[1];
+                if (k === undefined) {
+                  value = v;
+                } else if (value instanceof Map) {
+                  value.set(k, v);
+                } else if (value instanceof Set) {
+                  value.add(v);
+                } else if (isObject(value)) {
+                  if (v !== undefined || k in value) value[k] = v;
+                }
+              }
+            }
+          }
+          if (status !== 'not_valid') {
+            for (const failure of struct.refiner(value, ctx)) {
+              failure.explanation = options.message;
+              status = 'not_refined';
+              yield [failure, undefined];
+            }
+          }
+          if (status === 'valid') {
+            yield [undefined, value];
+          }
+        }
+        class Struct {
+          constructor(props) {
+            const {
+              type,
+              schema,
+              validator,
+              refiner,
+              coercer = value => value,
+              entries = function* () {}
+            } = props;
+            this.type = type;
+            this.schema = schema;
+            this.entries = entries;
+            this.coercer = coercer;
+            if (validator) {
+              this.validator = (value, context) => {
+                const result = validator(value, context);
+                return toFailures(result, context, this, value);
+              };
+            } else {
+              this.validator = () => [];
+            }
+            if (refiner) {
+              this.refiner = (value, context) => {
+                const result = refiner(value, context);
+                return toFailures(result, context, this, value);
+              };
+            } else {
+              this.refiner = () => [];
+            }
+          }
+          assert(value, message) {
+            return assert(value, this, message);
+          }
+          create(value, message) {
+            return create(value, this, message);
+          }
+          is(value) {
+            return is(value, this);
+          }
+          mask(value, message) {
+            return mask(value, this, message);
+          }
+          validate(value, options = {}) {
+            return validate(value, this, options);
+          }
+        }
+        function assert(value, struct, message) {
+          const result = validate(value, struct, {
+            message
+          });
+          if (result[0]) {
+            throw result[0];
+          }
+        }
+        function create(value, struct, message) {
+          const result = validate(value, struct, {
+            coerce: true,
+            message
+          });
+          if (result[0]) {
+            throw result[0];
+          } else {
+            return result[1];
+          }
+        }
+        function mask(value, struct, message) {
+          const result = validate(value, struct, {
+            coerce: true,
+            mask: true,
+            message
+          });
+          if (result[0]) {
+            throw result[0];
+          } else {
+            return result[1];
+          }
+        }
+        function is(value, struct) {
+          const result = validate(value, struct);
+          return !result[0];
+        }
+        function validate(value, struct, options = {}) {
+          const tuples = run(value, struct, options);
+          const tuple = shiftIterator(tuples);
+          if (tuple[0]) {
+            const error = new StructError(tuple[0], function* () {
+              for (const t of tuples) {
+                if (t[0]) {
+                  yield t[0];
+                }
+              }
+            });
+            return [error, undefined];
+          } else {
+            const v = tuple[1];
+            return [undefined, v];
+          }
+        }
+        function assign(...Structs) {
+          const isType = Structs[0].type === 'type';
+          const schemas = Structs.map(s => s.schema);
+          const schema = Object.assign({}, ...schemas);
+          return isType ? type(schema) : object(schema);
+        }
+        function define(name, validator) {
+          return new Struct({
+            type: name,
+            schema: null,
+            validator
+          });
+        }
+        function deprecated(struct, log) {
+          return new Struct({
+            ...struct,
+            refiner: (value, ctx) => value === undefined || struct.refiner(value, ctx),
+            validator(value, ctx) {
+              if (value === undefined) {
+                return true;
+              } else {
+                log(value, ctx);
+                return struct.validator(value, ctx);
+              }
+            }
+          });
+        }
+        function dynamic(fn) {
+          return new Struct({
+            type: 'dynamic',
+            schema: null,
+            *entries(value, ctx) {
+              const struct = fn(value, ctx);
+              yield* struct.entries(value, ctx);
+            },
+            validator(value, ctx) {
+              const struct = fn(value, ctx);
+              return struct.validator(value, ctx);
+            },
+            coercer(value, ctx) {
+              const struct = fn(value, ctx);
+              return struct.coercer(value, ctx);
+            },
+            refiner(value, ctx) {
+              const struct = fn(value, ctx);
+              return struct.refiner(value, ctx);
+            }
+          });
+        }
+        function lazy(fn) {
+          let struct;
+          return new Struct({
+            type: 'lazy',
+            schema: null,
+            *entries(value, ctx) {
+              struct ?? (struct = fn());
+              yield* struct.entries(value, ctx);
+            },
+            validator(value, ctx) {
+              struct ?? (struct = fn());
+              return struct.validator(value, ctx);
+            },
+            coercer(value, ctx) {
+              struct ?? (struct = fn());
+              return struct.coercer(value, ctx);
+            },
+            refiner(value, ctx) {
+              struct ?? (struct = fn());
+              return struct.refiner(value, ctx);
+            }
+          });
+        }
+        function omit(struct, keys) {
+          const {
+            schema
+          } = struct;
+          const subschema = {
+            ...schema
+          };
+          for (const key of keys) {
+            delete subschema[key];
+          }
+          switch (struct.type) {
+            case 'type':
+              return type(subschema);
+            default:
+              return object(subschema);
+          }
+        }
+        function partial(struct) {
+          const schema = struct instanceof Struct ? {
+            ...struct.schema
+          } : {
+            ...struct
+          };
+          for (const key in schema) {
+            schema[key] = optional(schema[key]);
+          }
+          return object(schema);
+        }
+        function pick(struct, keys) {
+          const {
+            schema
+          } = struct;
+          const subschema = {};
+          for (const key of keys) {
+            subschema[key] = schema[key];
+          }
+          return object(subschema);
+        }
+        function struct(name, validator) {
+          console.warn('superstruct@0.11 - The `struct` helper has been renamed to `define`.');
+          return define(name, validator);
+        }
+        function any() {
+          return define('any', () => true);
+        }
+        function array(Element) {
+          return new Struct({
+            type: 'array',
+            schema: Element,
+            *entries(value) {
+              if (Element && Array.isArray(value)) {
+                for (const [i, v] of value.entries()) {
+                  yield [i, v, Element];
+                }
+              }
+            },
+            coercer(value) {
+              return Array.isArray(value) ? value.slice() : value;
+            },
+            validator(value) {
+              return Array.isArray(value) || `Expected an array value, but received: ${print(value)}`;
+            }
+          });
+        }
+        function bigint() {
+          return define('bigint', value => {
+            return typeof value === 'bigint';
+          });
+        }
+        function boolean() {
+          return define('boolean', value => {
+            return typeof value === 'boolean';
+          });
+        }
+        function date() {
+          return define('date', value => {
+            return value instanceof Date && !isNaN(value.getTime()) || `Expected a valid \`Date\` object, but received: ${print(value)}`;
+          });
+        }
+        function enums(values) {
+          const schema = {};
+          const description = values.map(v => print(v)).join();
+          for (const key of values) {
+            schema[key] = key;
+          }
+          return new Struct({
+            type: 'enums',
+            schema,
+            validator(value) {
+              return values.includes(value) || `Expected one of \`${description}\`, but received: ${print(value)}`;
+            }
+          });
+        }
+        function func() {
+          return define('func', value => {
+            return typeof value === 'function' || `Expected a function, but received: ${print(value)}`;
+          });
+        }
+        function instance(Class) {
+          return define('instance', value => {
+            return value instanceof Class || `Expected a \`${Class.name}\` instance, but received: ${print(value)}`;
+          });
+        }
+        function integer() {
+          return define('integer', value => {
+            return typeof value === 'number' && !isNaN(value) && Number.isInteger(value) || `Expected an integer, but received: ${print(value)}`;
+          });
+        }
+        function intersection(Structs) {
+          return new Struct({
+            type: 'intersection',
+            schema: null,
+            *entries(value, ctx) {
+              for (const S of Structs) {
+                yield* S.entries(value, ctx);
+              }
+            },
+            *validator(value, ctx) {
+              for (const S of Structs) {
+                yield* S.validator(value, ctx);
+              }
+            },
+            *refiner(value, ctx) {
+              for (const S of Structs) {
+                yield* S.refiner(value, ctx);
+              }
+            }
+          });
+        }
+        function literal(constant) {
+          const description = print(constant);
+          const t = typeof constant;
+          return new Struct({
+            type: 'literal',
+            schema: t === 'string' || t === 'number' || t === 'boolean' ? constant : null,
+            validator(value) {
+              return value === constant || `Expected the literal \`${description}\`, but received: ${print(value)}`;
+            }
+          });
+        }
+        function map(Key, Value) {
+          return new Struct({
+            type: 'map',
+            schema: null,
+            *entries(value) {
+              if (Key && Value && value instanceof Map) {
+                for (const [k, v] of value.entries()) {
+                  yield [k, k, Key];
+                  yield [k, v, Value];
+                }
+              }
+            },
+            coercer(value) {
+              return value instanceof Map ? new Map(value) : value;
+            },
+            validator(value) {
+              return value instanceof Map || `Expected a \`Map\` object, but received: ${print(value)}`;
+            }
+          });
+        }
+        function never() {
+          return define('never', () => false);
+        }
+        function nullable(struct) {
+          return new Struct({
+            ...struct,
+            validator: (value, ctx) => value === null || struct.validator(value, ctx),
+            refiner: (value, ctx) => value === null || struct.refiner(value, ctx)
+          });
+        }
+        function number() {
+          return define('number', value => {
+            return typeof value === 'number' && !isNaN(value) || `Expected a number, but received: ${print(value)}`;
+          });
+        }
+        function object(schema) {
+          const knowns = schema ? Object.keys(schema) : [];
+          const Never = never();
+          return new Struct({
+            type: 'object',
+            schema: schema ? schema : null,
+            *entries(value) {
+              if (schema && isObject(value)) {
+                const unknowns = new Set(Object.keys(value));
+                for (const key of knowns) {
+                  unknowns.delete(key);
+                  yield [key, value[key], schema[key]];
+                }
+                for (const key of unknowns) {
+                  yield [key, value[key], Never];
+                }
+              }
+            },
+            validator(value) {
+              return isObject(value) || `Expected an object, but received: ${print(value)}`;
+            },
+            coercer(value) {
+              return isObject(value) ? {
+                ...value
+              } : value;
+            }
+          });
+        }
+        function optional(struct) {
+          return new Struct({
+            ...struct,
+            validator: (value, ctx) => value === undefined || struct.validator(value, ctx),
+            refiner: (value, ctx) => value === undefined || struct.refiner(value, ctx)
+          });
+        }
+        function record(Key, Value) {
+          return new Struct({
+            type: 'record',
+            schema: null,
+            *entries(value) {
+              if (isObject(value)) {
+                for (const k in value) {
+                  const v = value[k];
+                  yield [k, k, Key];
+                  yield [k, v, Value];
+                }
+              }
+            },
+            validator(value) {
+              return isObject(value) || `Expected an object, but received: ${print(value)}`;
+            }
+          });
+        }
+        function regexp() {
+          return define('regexp', value => {
+            return value instanceof RegExp;
+          });
+        }
+        function set(Element) {
+          return new Struct({
+            type: 'set',
+            schema: null,
+            *entries(value) {
+              if (Element && value instanceof Set) {
+                for (const v of value) {
+                  yield [v, v, Element];
+                }
+              }
+            },
+            coercer(value) {
+              return value instanceof Set ? new Set(value) : value;
+            },
+            validator(value) {
+              return value instanceof Set || `Expected a \`Set\` object, but received: ${print(value)}`;
+            }
+          });
+        }
+        function string() {
+          return define('string', value => {
+            return typeof value === 'string' || `Expected a string, but received: ${print(value)}`;
+          });
+        }
+        function tuple(Structs) {
+          const Never = never();
+          return new Struct({
+            type: 'tuple',
+            schema: null,
+            *entries(value) {
+              if (Array.isArray(value)) {
+                const length = Math.max(Structs.length, value.length);
+                for (let i = 0; i < length; i++) {
+                  yield [i, value[i], Structs[i] || Never];
+                }
+              }
+            },
+            validator(value) {
+              return Array.isArray(value) || `Expected an array, but received: ${print(value)}`;
+            }
+          });
+        }
+        function type(schema) {
+          const keys = Object.keys(schema);
+          return new Struct({
+            type: 'type',
+            schema,
+            *entries(value) {
+              if (isObject(value)) {
+                for (const k of keys) {
+                  yield [k, value[k], schema[k]];
+                }
+              }
+            },
+            validator(value) {
+              return isObject(value) || `Expected an object, but received: ${print(value)}`;
+            },
+            coercer(value) {
+              return isObject(value) ? {
+                ...value
+              } : value;
+            }
+          });
+        }
+        function union(Structs) {
+          const description = Structs.map(s => s.type).join(' | ');
+          return new Struct({
+            type: 'union',
+            schema: null,
+            coercer(value) {
+              for (const S of Structs) {
+                const [error, coerced] = S.validate(value, {
+                  coerce: true
+                });
+                if (!error) {
+                  return coerced;
+                }
+              }
+              return value;
+            },
+            validator(value, ctx) {
+              const failures = [];
+              for (const S of Structs) {
+                const [...tuples] = run(value, S, ctx);
+                const [first] = tuples;
+                if (!first[0]) {
+                  return [];
+                } else {
+                  for (const [failure] of tuples) {
+                    if (failure) {
+                      failures.push(failure);
+                    }
+                  }
+                }
+              }
+              return [`Expected the value to satisfy a union of \`${description}\`, but received: ${print(value)}`, ...failures];
+            }
+          });
+        }
+        function unknown() {
+          return define('unknown', () => true);
+        }
+        function coerce(struct, condition, coercer) {
+          return new Struct({
+            ...struct,
+            coercer: (value, ctx) => {
+              return is(value, condition) ? struct.coercer(coercer(value, ctx), ctx) : struct.coercer(value, ctx);
+            }
+          });
+        }
+        function defaulted(struct, fallback, options = {}) {
+          return coerce(struct, unknown(), x => {
+            const f = typeof fallback === 'function' ? fallback() : fallback;
+            if (x === undefined) {
+              return f;
+            }
+            if (!options.strict && isPlainObject(x) && isPlainObject(f)) {
+              const ret = {
+                ...x
+              };
+              let changed = false;
+              for (const key in f) {
+                if (ret[key] === undefined) {
+                  ret[key] = f[key];
+                  changed = true;
+                }
+              }
+              if (changed) {
+                return ret;
+              }
+            }
+            return x;
+          });
+        }
+        function trimmed(struct) {
+          return coerce(struct, string(), x => x.trim());
+        }
+        function empty(struct) {
+          return refine(struct, 'empty', value => {
+            const size = getSize(value);
+            return size === 0 || `Expected an empty ${struct.type} but received one with a size of \`${size}\``;
+          });
+        }
+        function getSize(value) {
+          if (value instanceof Map || value instanceof Set) {
+            return value.size;
+          } else {
+            return value.length;
+          }
+        }
+        function max(struct, threshold, options = {}) {
+          const {
+            exclusive
+          } = options;
+          return refine(struct, 'max', value => {
+            return exclusive ? value < threshold : value <= threshold || `Expected a ${struct.type} less than ${exclusive ? '' : 'or equal to '}${threshold} but received \`${value}\``;
+          });
+        }
+        function min(struct, threshold, options = {}) {
+          const {
+            exclusive
+          } = options;
+          return refine(struct, 'min', value => {
+            return exclusive ? value > threshold : value >= threshold || `Expected a ${struct.type} greater than ${exclusive ? '' : 'or equal to '}${threshold} but received \`${value}\``;
+          });
+        }
+        function nonempty(struct) {
+          return refine(struct, 'nonempty', value => {
+            const size = getSize(value);
+            return size > 0 || `Expected a nonempty ${struct.type} but received an empty one`;
+          });
+        }
+        function pattern(struct, regexp) {
+          return refine(struct, 'pattern', value => {
+            return regexp.test(value) || `Expected a ${struct.type} matching \`/${regexp.source}/\` but received "${value}"`;
+          });
+        }
+        function size(struct, min, max = min) {
+          const expected = `Expected a ${struct.type}`;
+          const of = min === max ? `of \`${min}\`` : `between \`${min}\` and \`${max}\``;
+          return refine(struct, 'size', value => {
+            if (typeof value === 'number' || value instanceof Date) {
+              return min <= value && value <= max || `${expected} ${of} but received \`${value}\``;
+            } else if (value instanceof Map || value instanceof Set) {
+              const {
+                size
+              } = value;
+              return min <= size && size <= max || `${expected} with a size ${of} but received one with a size of \`${size}\``;
+            } else {
+              const {
+                length
+              } = value;
+              return min <= length && length <= max || `${expected} with a length ${of} but received one with a length of \`${length}\``;
+            }
+          });
+        }
+        function refine(struct, name, refiner) {
+          return new Struct({
+            ...struct,
+            *refiner(value, ctx) {
+              yield* struct.refiner(value, ctx);
+              const result = refiner(value, ctx);
+              const failures = toFailures(result, ctx, struct, value);
+              for (const failure of failures) {
+                yield {
+                  ...failure,
+                  refinement: name
+                };
+              }
+            }
+          });
+        }
+        exports.Struct = Struct;
+        exports.StructError = StructError;
+        exports.any = any;
+        exports.array = array;
+        exports.assert = assert;
+        exports.assign = assign;
+        exports.bigint = bigint;
+        exports.boolean = boolean;
+        exports.coerce = coerce;
+        exports.create = create;
+        exports.date = date;
+        exports.defaulted = defaulted;
+        exports.define = define;
+        exports.deprecated = deprecated;
+        exports.dynamic = dynamic;
+        exports.empty = empty;
+        exports.enums = enums;
+        exports.func = func;
+        exports.instance = instance;
+        exports.integer = integer;
+        exports.intersection = intersection;
+        exports.is = is;
+        exports.lazy = lazy;
+        exports.literal = literal;
+        exports.map = map;
+        exports.mask = mask;
+        exports.max = max;
+        exports.min = min;
+        exports.never = never;
+        exports.nonempty = nonempty;
+        exports.nullable = nullable;
+        exports.number = number;
+        exports.object = object;
+        exports.omit = omit;
+        exports.optional = optional;
+        exports.partial = partial;
+        exports.pattern = pattern;
+        exports.pick = pick;
+        exports.record = record;
+        exports.refine = refine;
+        exports.regexp = regexp;
+        exports.set = set;
+        exports.size = size;
+        exports.string = string;
+        exports.struct = struct;
+        exports.trimmed = trimmed;
+        exports.tuple = tuple;
+        exports.type = type;
+        exports.union = union;
+        exports.unknown = unknown;
+        exports.validate = validate;
+      });
+    }, {}],
+    25: [function (require, module, exports) {
       var s = 1000;
       var m = s * 60;
       var h = m * 60;
@@ -3523,7 +3755,7 @@
         return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
       }
     }, {}],
-    24: [function (require, module, exports) {
+    26: [function (require, module, exports) {
       (function (process) {
         (function () {
           exports.formatArgs = formatArgs;
@@ -3609,10 +3841,10 @@
         }).call(this);
       }).call(this, require('_process'));
     }, {
-      "./common": 25,
-      "_process": 28
+      "./common": 27,
+      "_process": 4
     }],
-    25: [function (require, module, exports) {
+    27: [function (require, module, exports) {
       function setup(env) {
         createDebug.debug = createDebug;
         createDebug.default = createDebug;
@@ -3768,84 +4000,9 @@
       }
       module.exports = setup;
     }, {
-      "ms": 23
+      "ms": 25
     }],
-    26: [function (require, module, exports) {
-      exports.read = function (buffer, offset, isLE, mLen, nBytes) {
-        var e, m;
-        var eLen = nBytes * 8 - mLen - 1;
-        var eMax = (1 << eLen) - 1;
-        var eBias = eMax >> 1;
-        var nBits = -7;
-        var i = isLE ? nBytes - 1 : 0;
-        var d = isLE ? -1 : 1;
-        var s = buffer[offset + i];
-        i += d;
-        e = s & (1 << -nBits) - 1;
-        s >>= -nBits;
-        nBits += eLen;
-        for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-        m = e & (1 << -nBits) - 1;
-        e >>= -nBits;
-        nBits += mLen;
-        for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-        if (e === 0) {
-          e = 1 - eBias;
-        } else if (e === eMax) {
-          return m ? NaN : (s ? -1 : 1) * Infinity;
-        } else {
-          m = m + Math.pow(2, mLen);
-          e = e - eBias;
-        }
-        return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-      };
-      exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-        var e, m, c;
-        var eLen = nBytes * 8 - mLen - 1;
-        var eMax = (1 << eLen) - 1;
-        var eBias = eMax >> 1;
-        var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
-        var i = isLE ? 0 : nBytes - 1;
-        var d = isLE ? 1 : -1;
-        var s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
-        value = Math.abs(value);
-        if (isNaN(value) || value === Infinity) {
-          m = isNaN(value) ? 1 : 0;
-          e = eMax;
-        } else {
-          e = Math.floor(Math.log(value) / Math.LN2);
-          if (value * (c = Math.pow(2, -e)) < 1) {
-            e--;
-            c *= 2;
-          }
-          if (e + eBias >= 1) {
-            value += rt / c;
-          } else {
-            value += rt * Math.pow(2, 1 - eBias);
-          }
-          if (value * c >= 2) {
-            e++;
-            c /= 2;
-          }
-          if (e + eBias >= eMax) {
-            m = 0;
-            e = eMax;
-          } else if (e + eBias >= 1) {
-            m = (value * c - 1) * Math.pow(2, mLen);
-            e = e + eBias;
-          } else {
-            m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-            e = 0;
-          }
-        }
-        for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
-        e = e << mLen | m;
-        eLen += mLen;
-        for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
-        buffer[offset + i - d] |= s * 128;
-      };
-    }, {}],
-    27: [function (require, module, exports) {
+    28: [function (require, module, exports) {
       'use strict';
 
       const Yallist = require('yallist');
@@ -4094,163 +4251,6 @@
     }, {
       "yallist": 75
     }],
-    28: [function (require, module, exports) {
-      var process = module.exports = {};
-      var cachedSetTimeout;
-      var cachedClearTimeout;
-      function defaultSetTimout() {
-        throw new Error('setTimeout has not been defined');
-      }
-      function defaultClearTimeout() {
-        throw new Error('clearTimeout has not been defined');
-      }
-      (function () {
-        try {
-          if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-          } else {
-            cachedSetTimeout = defaultSetTimout;
-          }
-        } catch (e) {
-          cachedSetTimeout = defaultSetTimout;
-        }
-        try {
-          if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-          } else {
-            cachedClearTimeout = defaultClearTimeout;
-          }
-        } catch (e) {
-          cachedClearTimeout = defaultClearTimeout;
-        }
-      })();
-      function runTimeout(fun) {
-        if (cachedSetTimeout === setTimeout) {
-          return setTimeout(fun, 0);
-        }
-        if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-          cachedSetTimeout = setTimeout;
-          return setTimeout(fun, 0);
-        }
-        try {
-          return cachedSetTimeout(fun, 0);
-        } catch (e) {
-          try {
-            return cachedSetTimeout.call(null, fun, 0);
-          } catch (e) {
-            return cachedSetTimeout.call(this, fun, 0);
-          }
-        }
-      }
-      function runClearTimeout(marker) {
-        if (cachedClearTimeout === clearTimeout) {
-          return clearTimeout(marker);
-        }
-        if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-          cachedClearTimeout = clearTimeout;
-          return clearTimeout(marker);
-        }
-        try {
-          return cachedClearTimeout(marker);
-        } catch (e) {
-          try {
-            return cachedClearTimeout.call(null, marker);
-          } catch (e) {
-            return cachedClearTimeout.call(this, marker);
-          }
-        }
-      }
-      var queue = [];
-      var draining = false;
-      var currentQueue;
-      var queueIndex = -1;
-      function cleanUpNextTick() {
-        if (!draining || !currentQueue) {
-          return;
-        }
-        draining = false;
-        if (currentQueue.length) {
-          queue = currentQueue.concat(queue);
-        } else {
-          queueIndex = -1;
-        }
-        if (queue.length) {
-          drainQueue();
-        }
-      }
-      function drainQueue() {
-        if (draining) {
-          return;
-        }
-        var timeout = runTimeout(cleanUpNextTick);
-        draining = true;
-        var len = queue.length;
-        while (len) {
-          currentQueue = queue;
-          queue = [];
-          while (++queueIndex < len) {
-            if (currentQueue) {
-              currentQueue[queueIndex].run();
-            }
-          }
-          queueIndex = -1;
-          len = queue.length;
-        }
-        currentQueue = null;
-        draining = false;
-        runClearTimeout(timeout);
-      }
-      process.nextTick = function (fun) {
-        var args = new Array(arguments.length - 1);
-        if (arguments.length > 1) {
-          for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-          }
-        }
-        queue.push(new Item(fun, args));
-        if (queue.length === 1 && !draining) {
-          runTimeout(drainQueue);
-        }
-      };
-      function Item(fun, array) {
-        this.fun = fun;
-        this.array = array;
-      }
-      Item.prototype.run = function () {
-        this.fun.apply(null, this.array);
-      };
-      process.title = 'browser';
-      process.browser = true;
-      process.env = {};
-      process.argv = [];
-      process.version = '';
-      process.versions = {};
-      function noop() {}
-      process.on = noop;
-      process.addListener = noop;
-      process.once = noop;
-      process.off = noop;
-      process.removeListener = noop;
-      process.removeAllListeners = noop;
-      process.emit = noop;
-      process.prependListener = noop;
-      process.prependOnceListener = noop;
-      process.listeners = function (name) {
-        return [];
-      };
-      process.binding = function (name) {
-        throw new Error('process.binding is not supported');
-      };
-      process.cwd = function () {
-        return '/';
-      };
-      process.chdir = function (dir) {
-        throw new Error('process.chdir is not supported');
-      };
-      process.umask = function () {
-        return 0;
-      };
-    }, {}],
     29: [function (require, module, exports) {
       const ANY = Symbol('SemVer ANY');
       class Comparator {
@@ -4720,7 +4720,7 @@
       "../internal/re": 61,
       "./comparator": 29,
       "./semver": 31,
-      "lru-cache": 27
+      "lru-cache": 28
     }],
     31: [function (require, module, exports) {
       const debug = require('../internal/debug');
@@ -5436,7 +5436,7 @@
         }).call(this);
       }).call(this, require('_process'));
     }, {
-      "_process": 28
+      "_process": 4
     }],
     59: [function (require, module, exports) {
       const numeric = /^[0-9]+$/;
@@ -7253,7 +7253,7 @@
       exports.onRpcRequest = onRpcRequest;
     }, {
       "./utils/interfaces": 78,
-      "@metamask/snaps-ui": 2
+      "@metamask/snaps-ui": 6
     }],
     77: [function (require, module, exports) {
       "use strict";
