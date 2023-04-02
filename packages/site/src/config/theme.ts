@@ -14,7 +14,7 @@ const theme = {
   fontSizes: {
     heading: '5.2rem',
     mobileHeading: '3.6rem',
-    title: '2.4rem',
+    title: '2.0rem',
     large: '2rem',
     text: '1.6rem',
     small: '1.4rem',
@@ -44,6 +44,7 @@ export const light: DefaultTheme = {
       default: '#FFFFFF',
       alternative: '#F2F4F6',
       inverse: '#141618',
+      blue: '#6FA8DC'
     },
     icon: {
       default: '#141618',
@@ -59,8 +60,8 @@ export const light: DefaultTheme = {
       default: '#BBC0C5',
     },
     primary: {
-      default: '#6F4CFF',
-      inverse: '#FFFFFF',
+      default: '#6FA8DC',
+      inverse: '#212121',
     },
     card: {
       default: '#FFFFFF',
@@ -83,6 +84,7 @@ export const dark: DefaultTheme = {
       default: '#24272A',
       alternative: '#141618',
       inverse: '#FFFFFF',
+      blue: '#6FA8DC'
     },
     icon: {
       default: '#FFFFFF',
@@ -98,8 +100,8 @@ export const dark: DefaultTheme = {
       default: '#848C96',
     },
     primary: {
-      default: '#6F4CFF',
-      inverse: '#FFFFFF',
+      default: '#6FA8DC',
+      inverse: '#212121',
     },
     card: {
       default: '#141618',
