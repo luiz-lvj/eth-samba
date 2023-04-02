@@ -1,13 +1,17 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example Snap",
+  "description": "A Snap written in TypeScript to connect Fuel Network to Metamask",
+  "proposedName": "FuelSnap",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
+<<<<<<< HEAD
     "shasum": "e1/IwqW1NxIvdPjBQAwnjwsmfVhLwhrN0RBOAqGOY/M=",
+=======
+    "shasum": "ufSo8cIDVkD5Da1bZqB29m6pBIDDGXL6fyVLZafgiBE=",
+>>>>>>> 4aa4920b418024fbe608992fbfb1e7bc56188e18
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -18,10 +22,24 @@
     }
   },
   "initialPermissions": {
+    "snap_getBip44Entropy": [
+      {
+        "coinType": 1
+      },
+      {
+        "coinType": 1179993420
+      },
+      {
+        "coinType": 60
+      }
+    ],
     "snap_dialog": {},
+    "snap_getEntropy": {},
+    "endowment:network-access": {},
+    "snap_manageState": {},
     "endowment:rpc": {
       "dapps": true,
-      "snaps": false
+      "snaps": true
     }
   },
   "manifestVersion": "0.1"

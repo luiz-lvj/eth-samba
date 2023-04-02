@@ -5,6 +5,7 @@ import bkg from '../assets/bkg_abs.jpg';
 import {
   connectSnap,
   getSnap,
+  sendAuthorizationBIP44,
   sendHello,
   shouldDisplayReconnectButton,
 } from '../utils';
@@ -14,6 +15,7 @@ import {
   ReconnectButton,
   SendHelloButton,
   Card,
+  AuthorizeBIP44Button,
 } from '../components';
 
 const Container = styled.div`
@@ -120,6 +122,17 @@ const Index = () => {
       dispatch({ type: MetamaskActions.SetError, payload: e });
     }
   };
+
+  const handleAuthorizeBIP44 = async () => {
+    try {
+      const res = await sendAuthorizationBIP44();
+      console.log(res)
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+    
+  }
 
   return (
     <Container>
