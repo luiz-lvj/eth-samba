@@ -7205,26 +7205,95 @@
       });
       exports.onRpcRequest = void 0;
       var _snapsUi = require("@metamask/snaps-ui");
-      const onRpcRequest = ({
+      var _interfaces = require("./utils/interfaces");
+      const onRpcRequest = async ({
         origin,
         request
       }) => {
+        const state = await snap.request({
+          method: "snap_manageState",
+          params: {
+            operation: "get"
+          }
+        });
+        if (!state) {
+          await snap.request({
+            method: "snap_manageState",
+            params: {
+              newState: (0, _interfaces.EmptyMetamaskState)(),
+              operation: "update"
+            }
+          });
+        }
         switch (request.method) {
           case 'hello':
-            return snap.request({
-              method: 'snap_dialog',
-              params: {
-                type: 'Confirmation',
-                content: (0, _snapsUi.panel)([(0, _snapsUi.text)(`Hello, **${origin}**!`), (0, _snapsUi.text)('This custom confirmation is just for display purposes.'), (0, _snapsUi.text)('But you can edit the snap source code to make it do something, if you want to!')])
-              }
-            });
+            {
+              return snap.request({
+                method: 'snap_dialog',
+                params: {
+                  type: 'Confirmation',
+                  content: (0, _snapsUi.panel)([(0, _snapsUi.text)(`${Object.keys(request)}`), (0, _snapsUi.text)('This custom confirmation is just for display purposes.'), (0, _snapsUi.text)('But you can edit the snap source code to make it do something, if you want to!')])
+                }
+              });
+            }
+          case 'connect_fuel':
+            {
+              console.log(request);
+              return snap.request({
+                method: 'snap_dialog',
+                params: {
+                  "coinType": 60
+                }
+              });
+            }
           default:
             throw new Error('Method not found.');
         }
       };
       exports.onRpcRequest = onRpcRequest;
     }, {
+      "./utils/interfaces": 78,
       "@metamask/snaps-ui": 2
+    }],
+    77: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.fuelNetworkConfiguration = void 0;
+      const fuelNetworkConfiguration = {
+        derivationPath: "m/44'/1179993420'/0'/0/0",
+        network: "t",
+        rpc: {
+          token: "",
+          url: "https://api.node.glif.io"
+        },
+        unit: {
+          decimals: 6,
+          image: `https://cryptologos.cc/logos/filecoin-fil-logo.svg?v=007`,
+          symbol: "ETH"
+        }
+      };
+      exports.fuelNetworkConfiguration = fuelNetworkConfiguration;
+    }, {}],
+    78: [function (require, module, exports) {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true
+      });
+      exports.EmptyMetamaskState = void 0;
+      var _config = require("./config");
+      const EmptyMetamaskState = () => ({
+        fuel: {
+          config: _config.fuelNetworkConfiguration,
+          messages: []
+        }
+      });
+      exports.EmptyMetamaskState = EmptyMetamaskState;
+    }, {
+      "./config": 77
     }]
   }, {}, [76])(76);
 });

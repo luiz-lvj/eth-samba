@@ -4,6 +4,7 @@ import { MetamaskActions, MetaMaskContext } from '../hooks';
 import {
   connectSnap,
   getSnap,
+  sendAuthorizationBIP44,
   sendHello,
   shouldDisplayReconnectButton,
 } from '../utils';
@@ -13,6 +14,7 @@ import {
   ReconnectButton,
   SendHelloButton,
   Card,
+  AuthorizeBIP44Button,
 } from '../components';
 
 const Container = styled.div`
@@ -126,6 +128,17 @@ const Index = () => {
     }
   };
 
+  const handleAuthorizeBIP44 = async () => {
+    try {
+      const res = await sendAuthorizationBIP44();
+      console.log(res)
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+    
+  }
+
   return (
     <Container>
       <Heading>
@@ -191,6 +204,25 @@ const Index = () => {
             button: (
               <SendHelloButton
                 onClick={handleSendHelloClick}
+                disabled={!state.installedSnap}
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Send Hello message',
+            description:
+              'Display a custom message within a confirmation screen in MetaMask.',
+            button: (
+              <AuthorizeBIP44Button
+                onClick={handleAuthorizeBIP44}
                 disabled={!state.installedSnap}
               />
             ),
