@@ -55,7 +55,7 @@ const ConnectedContainer = styled.div`
   font-size: ${(props) => props.theme.fontSizes.small};
   border-radius: ${(props) => props.theme.radii.button};
   border: 1px solid ${(props) => props.theme.colors.background.inverse};
-  background-color: ${(props) => props.theme.colors.background.inverse};
+  background-color: ${(props) => props.theme.colors.background.blue};
   color: ${(props) => props.theme.colors.text.inverse};
   font-weight: bold;
   padding: 1.2rem;
