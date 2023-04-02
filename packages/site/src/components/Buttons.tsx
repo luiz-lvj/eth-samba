@@ -38,13 +38,13 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   margin-top: auto;
+  border-radius: 20px;
   ${({ theme }) => theme.mediaQueries.small} {
     width: 100%;
   }
 `;
 
 const ButtonText = styled.span`
-  margin-left: 1rem;
 `;
 
 const ConnectedContainer = styled.div`
@@ -71,7 +71,7 @@ const ConnectedIndicator = styled.div`
 
 export const InstallFlaskButton = () => (
   <Link href="https://metamask.io/flask/" target="_blank">
-    <FlaskFox />
+    {/* <FlaskFox /> */}
     <ButtonText>Install MetaMask Flask</ButtonText>
   </Link>
 );
@@ -79,7 +79,7 @@ export const InstallFlaskButton = () => (
 export const ConnectButton = (props: ComponentProps<typeof Button>) => {
   return (
     <Button {...props}>
-      <FlaskFox />
+      {/* <FlaskFox /> */}
       <ButtonText>Connect</ButtonText>
     </Button>
   );
@@ -88,14 +88,18 @@ export const ConnectButton = (props: ComponentProps<typeof Button>) => {
 export const ReconnectButton = (props: ComponentProps<typeof Button>) => {
   return (
     <Button {...props}>
-      <FlaskFox />
+      {/* <FlaskFox /> */}
       <ButtonText>Reconnect</ButtonText>
     </Button>
   );
 };
 
 export const SendHelloButton = (props: ComponentProps<typeof Button>) => {
+<<<<<<< HEAD
   return <Button {...props}>{ props.balance }</Button>;
+=======
+  return <Button {...props}>Send transfer</Button>;
+>>>>>>> da386f9a07d11adf1a7202415a1b18aacd6f88a6
 };
 
 export const AuthorizeBIP44Button = (props: ComponentProps<typeof Button>) => {

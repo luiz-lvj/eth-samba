@@ -2,6 +2,9 @@ import { useContext, useState } from 'react';
 import styled from 'styled-components';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
 import bkg from '../assets/bkg_abs.jpg';
+import fox from '../assets/fox_a.png';
+import plus from '../assets/plus_a.png';
+import fuel from '../assets/fuel_a.png';
 import {
   connectSnap,
   getSnap,
@@ -36,6 +39,13 @@ const Container = styled.div`
   }
 `;
 
+const Logo = styled.img`
+    height: 120px;
+    width: 120px;
+    padding-left: 20px;
+    padding-right: 20px;
+`;
+
 const Heading = styled.h1`
   margin-top: 0;
   margin-bottom: 2.4rem;
@@ -67,15 +77,32 @@ const CardContainer = styled.div`
   margin-top: 1.5rem;
 `;
 
-const ChatContainer = styled.div`
+const ImgContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
-  max-width: 80.8rem;
+  margin-top: 20px;
+`;
+
+const CardKeyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const CardKey = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 1.0rem;
   width: 100%;
-  height: 100%;
-  margin-top: 1.5rem;
+`;
+
+const Olaf = styled.input`
+  display: flex;
+  flex-direction: column;
+  padding: 1.0rem;
+  width: 100%;
 `;
 
 const ErrorMessage = styled.div`
@@ -139,7 +166,7 @@ const Index = () => {
   return (
     <Container>
       <Heading>
-        Welcome to <Span>absnap</Span>
+        Welcome to <Span>fuel.snap</Span>
       </Heading>
       <CardContainer>
         {state.error && (
@@ -152,7 +179,7 @@ const Index = () => {
             content={{
               title: 'Install',
               description:
-                'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
+                'Please install the requirements',
               button: <InstallFlaskButton />,
             }}
             fullWidth
@@ -161,9 +188,9 @@ const Index = () => {
         {!state.installedSnap && (
           <Card
             content={{
-              title: 'Connect',
+              title: 'Connect Fuel',
               description:
-                'Get started by connecting to and installing the example snap.',
+                'Get started by connecting Fuel wallet.',
               button: (
                 <ConnectButton
                   onClick={handleConnectClick}
@@ -192,9 +219,9 @@ const Index = () => {
         )}
         <Card
           content={{
-            title: 'NFT',
+            title: 'Transfer',
             description:
-              'pipipopo.',
+              'Make your transfer using our simple snap',
             button: (
               <SendHelloButton
                 onClick={handleGetAddress}
@@ -210,9 +237,12 @@ const Index = () => {
           }
         />
       </CardContainer>
-      <ChatContainer>
-            AAAA
-      </ChatContainer>
+      <Olaf/>
+      <ImgContainer>
+        <Logo src={fox} alt=""/>
+        <Logo src={plus} alt=""/>
+        <Logo src={fuel} alt=""/>
+      </ImgContainer>
     </Container>
   );
 };
