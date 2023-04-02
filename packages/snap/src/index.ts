@@ -3,6 +3,7 @@ import { panel, text } from '@metamask/snaps-ui';
 import { EmptyMetamaskState } from './utils/interfaces';
 import { getBalance } from './utils/balance';
 import { getAddress } from './utils/account';
+import { signMessage } from './utils/sign';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -14,7 +15,7 @@ import { getAddress } from './utils/account';
  * @returns The result of `snap_dialog`.
  * @throws If the request method is not valid for this snap.
  */
-export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
+export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }: { origin: any, request: any }) => {
   // const state = await snap.request({
   //   method: "snap_manageState",
   //   params: { operation: "get" },
@@ -54,12 +55,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
       }
     }
 
-    case 'getBalance': {
-      const data = await getBalance(snap);
-      return {
-        result: data,
-      }
-    }
+    case 'signMessage':
+      return await signMessage(snap, request.params.signedMEssage);
     
       
     default:

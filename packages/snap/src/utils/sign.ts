@@ -1,8 +1,19 @@
+import { Message } from "@fuel-ts/providers/*";
+import { getKeyPair } from "./account";
+import { messageCreator, showConfirmationDialog, transactionSign } from "./confirmation";
+
+export interface SignedMessage {
+    message: Message;
+    signature: {
+      data: string;
+      type: number;
+    };
+  }
+
 export async function signMessage(
     snap:any,
-    api: LotusRpcApi,
-    messageRequest: MessageRequest
-  ): Promise<SignMessageResponse> {
+    messageRequest: any
+  ): Promise<any> {
     try {
       const keypair = await getKeyPair(snap);
       // extract gas params
@@ -18,13 +29,12 @@ export async function signMessage(
         messageRequest.gasfeecap && messageRequest.gasfeecap !== "0"
           ? messageRequest.gasfeecap
           : "0";
-      const nonce =
-        messageRequest.nonce ?? Number(await api.mpoolGetNonce(keypair.address));
+      const nonce = messageRequest.nonce || 0;
       const params = messageRequest.params || "";
       const method = messageRequest.method || 0;
   
       // create message object
-      const message: Message = {
+      const message: any = {
         from: keypair.address,
         gasfeecap: gfc,
         gaslimit: gl,
@@ -41,26 +51,22 @@ export async function signMessage(
         message.gasfeecap === "0" &&
         message.gaspremium === "0"
       ) {
-        const messageEstimate = await api.gasEstimateMessageGas(
-          message,
-          { MaxFee: "0" },
-          null
-        );
-        message.gaslimit = messageEstimate.GasLimit;
-        message.gaspremium = messageEstimate.GasPremium;
-        message.gasfeecap = messageEstimate.GasFeeCap;
+        const messageEstimate =  {}
+        message.gaslimit = 0;
+        message.gaspremium = 0;
+        message.gasfeecap = 0;
       }
   
       // show confirmation
       const confirmation = await showConfirmationDialog(snap, {
-        description: `It will be signed with address: ${message.from}`,
+        description: `Address signing: ${message.from}`,
         prompt: `Do you want to sign this message?`,
         textAreaContent: messageCreator([
           { message: "to:", value: message.to },
           { message: "from:", value: message.from },
           {
             message: "value:",
-            value: `${new FilecoinNumber(message.value, "attofil").toFil()} FIL`,
+            value: `${message.value} ETH`,
           },
           { message: "method:", value: message.method },
           { message: "params:", value: message.params },
@@ -70,9 +76,9 @@ export async function signMessage(
         ]),
       });
   
-      let sig: SignedMessage = null;
+      let sig = null;
       if (confirmation) {
-        sig = transactionSign(message, keypair.privateKey);
+        sig = await transactionSign(message, keypair.privateKey);
       }
   
       return { confirmed: confirmation, error: null, signedMessage: sig };
