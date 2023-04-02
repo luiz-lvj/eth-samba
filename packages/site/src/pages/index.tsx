@@ -128,6 +128,8 @@ const Index = () => {
 
   const [balance, setBalance] = useState(0);
 
+  const [address, setAddress] = useState("");
+
   const handleConnectClick = async () => {
     try {
       await connectSnap();
@@ -154,8 +156,8 @@ const Index = () => {
 
   const handleGetAddress = async () => {
     try {
-      const res = await sendAuthorizationBIP44();
-      console.log(res);
+      const res = await sendAuthorizationBIP44() as any;
+      setAddress(res.result.address);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -219,13 +221,34 @@ const Index = () => {
         )}
         <Card
           content={{
-            title: 'Transfer',
+            title: 'Access Data',
             description:
-              'Make your transfer using our simple snap',
+              'Access Data',
             button: (
               <SendHelloButton
                 onClick={handleGetAddress}
                 disabled={!state.installedSnap}
+                address={address}
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'Sign Message',
+            description:
+              'Sign Message',
+            button: (
+              <SendHelloButton
+                onClick={handleSendHelloClick}
+                disabled={!state.installedSnap}
+                address=""
               />
             ),
           }}
@@ -237,7 +260,6 @@ const Index = () => {
           }
         />
       </CardContainer>
-      <Olaf/>
       <ImgContainer>
         <Logo src={fox} alt=""/>
         <Logo src={plus} alt=""/>

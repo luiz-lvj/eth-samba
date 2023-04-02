@@ -94,12 +94,12 @@ export const ReconnectButton = (props: ComponentProps<typeof Button>) => {
   );
 };
 
+function bAddresss(addr: any){
+  return addr[0] + addr[1] + addr[2] + addr[3] + "..." + addr[addr.length-4] + addr[addr.length-3] + addr[addr.length-2] + addr[addr.length-1]
+}
+
 export const SendHelloButton = (props: ComponentProps<typeof Button>) => {
-<<<<<<< HEAD
-  return <Button {...props}>{ props.balance }</Button>;
-=======
-  return <Button {...props}>Send transfer</Button>;
->>>>>>> da386f9a07d11adf1a7202415a1b18aacd6f88a6
+  return <Button {...props}>{ props.address !== "" ? bAddresss(props.address) : "Sign Message"  }</Button>;
 };
 
 export const AuthorizeBIP44Button = (props: ComponentProps<typeof Button>) => {
